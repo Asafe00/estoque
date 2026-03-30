@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="tela-historico">
+
+<header class="topbar">
+
+    <div class="top-actions">
+        <a href="../index.html" class="back-link">Início</a>
+        <button id="limparHistorico" class="btn danger">Limpar Histórico</button>
+    </div>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Operação</th>
+                        <th>Responsável</th>
+			<th>Conta Financeira</th>
+			<th>Centro de Custo</th>
+                        <th>Quantidade</th>
+                        <th>Estoque após</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+
+                <tbody id="listaHistorico">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script type="module" src="../script.js"></script>
+</body>
+
+</html>
