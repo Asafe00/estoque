@@ -263,7 +263,9 @@ async function mostrarProdutos(){
         data: new Date().toLocaleString()
       });
 
-      location.reload();
+      inputNumero.value = "";
+      inputPessoa.value = "";
+      await mostrarProdutos();
     });
 
     // 🔹 SAÍDA
@@ -295,11 +297,10 @@ async function mostrarProdutos(){
         data: new Date().toLocaleString()
       });
 
-      location.reload();
+      inputNumero.value = "";
+      inputPessoa.value = "";
+      await mostrarProdutos();
     });
-
-    const container = document.createElement("div");
-    container.classList.add("controle-estoque");
 
     tdMov.appendChild(inputPessoa);
     tdMov.appendChild(inputNumero);
@@ -313,8 +314,6 @@ async function mostrarProdutos(){
     listaMovimentacao.appendChild(tr);
   }
 }
-
-
 
 const listaHistorico = document.getElementById("listaHistorico");
 
