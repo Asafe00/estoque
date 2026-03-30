@@ -6,8 +6,7 @@ import {
   push, 
   get, 
   remove, 
-  update,
-  onValue
+  update
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -316,25 +315,6 @@ async function mostrarProdutos(){
 }
 
 
-const campoPesquisa = document.getElementById("pesquisaProduto");
-
-if(campoPesquisa){
-
-campoPesquisa.addEventListener("input", function(){
-
-const texto = campoPesquisa.value.toLowerCase();
-
-const filtrados = produtos.filter(function(produto){
-
-return produto.nome.toLowerCase().includes(texto);
-});
-
-
-mostrarProdutos(filtrados);
-
-});
-
-}
 
 const listaHistorico = document.getElementById("listaHistorico");
 
