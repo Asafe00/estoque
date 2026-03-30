@@ -325,8 +325,7 @@ tbody tr:hover {
 
 /* Botões */
 .btn-add,
-.btn-rem,
-.botaoexcluir {
+.btn-rem {
   width: 30px;
   height: 30px;
   font-size: 20px;
@@ -336,6 +335,18 @@ tbody tr:hover {
   cursor: pointer;
   transition: 0.2s;
 }
+
+.botaoexcluir{
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+
+}
+.botaoexcluir:hover {
+  transform: scale(1.1);
+}
+
 
 /* Botão + */
 .btn-add {
