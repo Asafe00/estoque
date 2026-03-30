@@ -1,0 +1,378 @@
+/* =======================
+   RESET & BASE
+======================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+}
+
+/* =======================
+   VARIÁVEIS (DARK THEME)
+======================= */
+:root {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #020617;
+
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+
+    --border: #1e293b;
+
+    --radius: 12px;
+    --transition: 0.2s ease;
+}
+
+/* =======================
+   LAYOUT
+======================= */
+.container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =======================
+   TOPBAR
+======================= */
+.topbar {
+    background: var(--bg-secondary);
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.top-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* =======================
+   MENU (INDEX)
+======================= */
+.menu {
+    list-style: none;
+    max-width: 400px;
+    margin: 80px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.menu li a {
+    display: block;
+    text-decoration: none;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    padding: 15px;
+    border-radius: var(--radius);
+    text-align: center;
+    transition: var(--transition);
+    border: 1px solid transparent;
+}
+
+.menu li a:hover {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--accent);
+    transform: translateY(-2px);
+}
+
+/* =======================
+   CARDS
+======================= */
+.card {
+    background: var(--bg-secondary);
+    padding: 20px;
+    border-radius: var(--radius);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.card h2 {
+    margin-bottom: 15px;
+}
+
+/* =======================
+   FORMULÁRIOS
+======================= */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+label {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.input {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    padding: 10px;
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    transition: var(--transition);
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+}
+
+/* =======================
+   BOTÕES
+======================= */
+.btn {
+    background: var(--accent);
+    border: none;
+    padding: 10px;
+    border-radius: var(--radius);
+    color: white;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn:hover {
+    background: var(--accent-hover);
+}
+
+.btn.small {
+    padding: 6px 10px;
+    font-size: 13px;
+}
+
+.btn.danger {
+    background: var(--danger);
+}
+
+.btn.danger:hover {
+    background: var(--danger-hover);
+}
+
+/* =======================
+   LINKS
+======================= */
+a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+/* =======================
+   TABELAS
+======================= */
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+thead {
+    background: var(--bg-tertiary);
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+tbody tr {
+    border-top: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+tbody tr:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+/* =======================
+   SEARCH BOX
+======================= */
+.search-box {
+    display: flex;
+}
+
+.search-box input {
+    width: 100%;
+}
+
+/* =======================
+   LOGIN / REGISTRO
+======================= */
+.form-login,
+.form-register {
+    background: var(--bg-secondary);
+    padding: 30px;
+    border-radius: var(--radius);
+    max-width: 400px;
+    margin: 60px auto;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.form-login h1,
+.form-register h1 {
+    margin-bottom: 20px;
+}
+
+.login-text,
+.register-text {
+    margin-top: 15px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* =======================
+   FEEDBACK (PREPARADO)
+======================= */
+.input.error {
+    border-color: var(--danger);
+}
+
+.input.success {
+    border-color: #22c55e;
+}
+
+/* =======================
+   SCROLLBAR (BONUS)
+======================= */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+}
+
+
+/* Inputs */
+.input-pessoa,
+.input-numero {
+  background-color: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+
+/* Tamanhos */
+.input-pessoa {
+  width: 100px;
+}
+
+.input-numero {
+  width: 60px;
+}
+
+/* Focus */
+
+.input-pessoa:focus,
+.input-numero:focus {
+  border-color: #22c55e;
+  box-shadow: 0 0 5px #22c55e50;
+}
+
+/* Botões */
+.btn-add,
+.btn-rem {
+  width: 30px;
+  height: 30px;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.botaoexcluir{
+  width: 60px;
+  height: 30px;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.botaoexcluir:hover {
+  transform: scale(1.1);
+}
+
+
+/* Botão + */
+.btn-add {
+  background-color: #22c55e;
+  color: white;
+}
+
+.btn-add:hover {
+  background-color: #16a34a;
+  transform: scale(1.1);
+}
+
+/* Botão - */
+.btn-rem {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-rem:hover {
+  background-color: #dc2626;
+  transform: scale(1.1);
+}
+
+
+
