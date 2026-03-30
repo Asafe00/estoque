@@ -171,6 +171,7 @@ if(listaProdutos){
 
       const botaoExcluir = document.createElement("button");
       botaoExcluir.textContent = "Excluir";
+      botaoExcluir.classList.add("botaoexcluir");
 
       botaoExcluir.addEventListener("click", async function(){
 

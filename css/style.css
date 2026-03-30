@@ -325,7 +325,8 @@ tbody tr:hover {
 
 /* Botões */
 .btn-add,
-.btn-rem {
+.btn-rem,
+.botaoexcluir {
   width: 30px;
   height: 30px;
   font-size: 20px;
