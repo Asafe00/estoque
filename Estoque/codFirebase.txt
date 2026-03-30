@@ -1,0 +1,22 @@
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDSt1sx09eqlcOpvjw8JpmzDaDvN5JBqTQ",
+    authDomain: "estoque-empresa-20acc.firebaseapp.com",
+    databaseURL: "https://estoque-empresa-20acc-default-rtdb.firebaseio.com",
+    projectId: "estoque-empresa-20acc",
+    storageBucket: "estoque-empresa-20acc.firebasestorage.app",
+    messagingSenderId: "333468546043",
+    appId: "1:333468546043:web:1b70d85efbfa431627915e"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
+
+py -m http.server 8000
