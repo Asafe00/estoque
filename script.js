@@ -6,7 +6,8 @@ import {
   push, 
   get, 
   remove, 
-  update 
+  update,
+  onValue
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -314,23 +315,6 @@ async function mostrarProdutos(){
   }
 }
 
-// 🔹 CHAMADA
-import { ref, onValue } from "firebase/database";
-
-const dbRef = ref(db, "produtos");
-
-onValue(dbRef, (snapshot) => {
-    produtos = [];
-
-    snapshot.forEach((child) => {
-        produtos.push({
-            id: child.key,
-            ...child.val()
-        });
-    });
-
-    mostrarProdutos(produtos);
-});
 
 const campoPesquisa = document.getElementById("pesquisaProduto");
 
