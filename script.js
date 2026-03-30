@@ -195,7 +195,6 @@ if(listaProdutos){
 }
 
 async function mostrarProdutos(){
-
   const listaMovimentacao = document.getElementById("listaMovimentacao");
   if(!listaMovimentacao) return;
 
@@ -309,6 +308,12 @@ async function mostrarProdutos(){
 
     listaMovimentacao.appendChild(tr);
   }
+}
+
+const listaMovimentacao = document.getElementById("listaMovimentacao");
+
+if (listaMovimentacao) {
+  mostrarProdutos();
 }
 
 const listaHistorico = document.getElementById("listaHistorico");
