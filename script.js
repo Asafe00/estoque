@@ -263,9 +263,7 @@ async function mostrarProdutos(){
         data: new Date().toLocaleString()
       });
 
-      inputNumero.value = "";
-      inputPessoa.value = "";
-      await mostrarProdutos();
+      location.reload();
     });
 
     // 🔹 SAÍDA
@@ -297,9 +295,7 @@ async function mostrarProdutos(){
         data: new Date().toLocaleString()
       });
 
-      inputNumero.value = "";
-      inputPessoa.value = "";
-      await mostrarProdutos();
+      location.reload();
     });
 
     tdMov.appendChild(inputPessoa);
