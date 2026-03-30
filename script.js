@@ -315,7 +315,22 @@ async function mostrarProdutos(){
 }
 
 // 🔹 CHAMADA
-mostrarProdutos();
+import { ref, onValue } from "firebase/database";
+
+const dbRef = ref(db, "produtos");
+
+onValue(dbRef, (snapshot) => {
+    produtos = [];
+
+    snapshot.forEach((child) => {
+        produtos.push({
+            id: child.key,
+            ...child.val()
+        });
+    });
+
+    mostrarProdutos(produtos);
+});
 
 const campoPesquisa = document.getElementById("pesquisaProduto");
 

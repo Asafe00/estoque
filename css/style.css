@@ -336,22 +336,6 @@ tbody tr:hover {
   transition: 0.2s;
 }
 
-.botaoexcluir:hover{
-  width: 60px;
-  height: 30px;
-  font-size: 20px;
-  font-weight: bold;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.botaoexcluir:hover {
-  transform: scale(1.1);
-}
-
-
 /* Botão + */
 .btn-add {
   background-color: #22c55e;
@@ -374,5 +358,42 @@ tbody tr:hover {
   transform: scale(1.1);
 }
 
+.botaoexcluir {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
 
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25);
+}
+
+/* HOVER */
+.botaoexcluir:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(239, 68, 68, 0.35);
+}
+
+/* CLICK */
+.botaoexcluir:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* FOCUS (acessibilidade) */
+.botaoexcluir:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.4);
+}
+
+/* VERSÃO PEQUENA (se usar em tabela) */
+.botaoexcluir.small {
+    padding: 5px 10px;
+    font-size: 12px;
+}
 
