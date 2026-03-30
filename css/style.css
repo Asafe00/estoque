@@ -297,7 +297,9 @@ tbody tr:hover {
 
 /* Inputs */
 .input-pessoa,
-.input-numero {
+.input-numero,
+.input-conta,
+.input-centro {
   background-color: #2a2a2a;
   border: 1px solid #3a3a3a;
   color: white;
@@ -307,7 +309,9 @@ tbody tr:hover {
 }
 
 /* Tamanhos */
-.input-pessoa {
+.input-pessoa,
+.input-conta,
+.input-centro {
   width: 100px;
 }
 

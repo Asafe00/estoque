@@ -237,11 +237,23 @@ async function mostrarProdutos(){
     botaoRem.textContent = "-";
     botaoRem.classList.add("btn-rem");
 
+    const inputConta = document.createElement("input");
+    inputConta.type = "text";
+    inputConta.placeholder = "Conta financeira";
+    inputConta.classList.add("input-conta");
+
+    const inputCentro = document.createElement("input");
+    inputCentro.type = "text";
+    inputCentro.placeholder = "Centro de custo";
+    inputCentro.classList.add("input-centro");
+
     // 🔹 ENTRADA
     botaoAdd.addEventListener("click", async function(){
 
       const valor = Number(inputNumero.value);
       const pessoa = inputPessoa.value;
+      const conta = inputConta.value;
+      const centro = inputCentro.value;
 
       if(!valor) return;
 
@@ -259,6 +271,8 @@ async function mostrarProdutos(){
         responsavel: pessoa || "Não Informado",
         quantidade: valor,
         estoqueFinal: novaQuantidade,
+	contaFinanceira: conta || "Não informado",
+	centroCusto: centro || "Não informado",
         data: new Date().toLocaleString()
       });
 
@@ -270,6 +284,8 @@ async function mostrarProdutos(){
 
       const valor = Number(inputNumero.value);
       const pessoa = inputPessoa.value;
+      const conta = inputConta.value;
+      const centro = inputCentro.value;
 
       if(!valor) return;
 
@@ -291,6 +307,8 @@ async function mostrarProdutos(){
         responsavel: pessoa || "Não informado",
         quantidade: valor,
         estoqueFinal: novaQuantidade,
+	contaFinanceira: conta || "Não informado",
+	centroCusto: centro || "Não informado",
         data: new Date().toLocaleString()
       });
 
@@ -301,6 +319,8 @@ async function mostrarProdutos(){
     tdMov.appendChild(inputNumero);
     tdMov.appendChild(botaoAdd);
     tdMov.appendChild(botaoRem);
+    tdMov.appendChild(inputConta);
+    tdMov.appendChild(inputCentro);
 
     tr.appendChild(tdNome);
     tr.appendChild(tdQtd);
@@ -351,6 +371,12 @@ if(listaHistorico){
 
       const tdResponsavel = document.createElement("td");
       tdResponsavel.textContent = item.responsavel;
+   
+      const tdConta = document.createElement("td");
+      tdConta.textContent = item.contaFinanceira || "—";
+
+      const tdCentro = document.createElement("td");
+      tdCentro.textContent = item.centroCusto || "—";
 
       const tdQtd = document.createElement("td");
       tdQtd.textContent = item.quantidade;
@@ -364,10 +390,12 @@ if(listaHistorico){
       tr.appendChild(tdProduto);
       tr.appendChild(tdTipo);
       tr.appendChild(tdResponsavel);
+      tr.appendChild(tdConta);    
+      tr.appendChild(tdCentro);   
       tr.appendChild(tdQtd);
       tr.appendChild(tdEstoque);
       tr.appendChild(tdData);
-
+      
       listaHistorico.appendChild(tr);
     }
   }
