@@ -148,51 +148,45 @@ if(existe){
 }
 async function carregarProdutos(){
   const listaProdutos = document.getElementById("listaProdutos");
-  if(listaProdutos){
+  if(!listaProdutos) return;
 
-    listaProdutos.innerHTML = "";
+  listaProdutos.innerHTML = "";
 
-    const snapshot = await get(ref(database, "produtos"));
+  const snapshot = await get(ref(database, "produtos"));
 
-    if(!snapshot.exists()) return;
+  if(!snapshot.exists()) return;
 
-    const produtos = snapshot.val();
+  const produtos = snapshot.val();
 
-    for(let id in produtos){
+  for(let id in produtos){
 
-      const tr = document.createElement("tr");
+    const tr = document.createElement("tr");
 
-      const tdNome = document.createElement("td");
-      tdNome.textContent = produtos[id].nome;
+    const tdNome = document.createElement("td");
+    tdNome.textContent = produtos[id].nome;
 
-      const tdQtd = document.createElement("td");
-      tdQtd.textContent = produtos[id].quantidade;
+    const tdQtd = document.createElement("td");
+    tdQtd.textContent = produtos[id].quantidade;
 
-      const tdAcao = document.createElement("td");
+    const tdAcao = document.createElement("td");
 
-      const botaoExcluir = document.createElement("button");
-      botaoExcluir.textContent = "Excluir";
-      botaoExcluir.classList.add("botaoexcluir");
+    const botaoExcluir = document.createElement("button");
+    botaoExcluir.textContent = "Excluir";
+    botaoExcluir.classList.add("botaoexcluir");
 
-      botaoExcluir.addEventListener("click", async function(){
+    botaoExcluir.addEventListener("click", async function(){
+      await remove(ref(database, "produtos/" + id));
+      carregarProdutos(); // ✅ aqui sim faz sentido
+    });
 
-        // 🔹 REMOVE PELO ID DO FIREBASE
-        await remove(ref(database, "produtos/" + id));
+    tdAcao.appendChild(botaoExcluir);
 
-        carregarProdutos();
-      });
+    tr.appendChild(tdNome);
+    tr.appendChild(tdQtd);
+    tr.appendChild(tdAcao);
 
-      tdAcao.appendChild(botaoExcluir);
-
-      tr.appendChild(tdNome);
-      tr.appendChild(tdQtd);
-      tr.appendChild(tdAcao);
-
-      listaProdutos.appendChild(tr);
-    }
+    listaProdutos.appendChild(tr);
   }
-
-  carregarProdutos();
 }
 
 async function mostrarProdutos(){
@@ -338,6 +332,7 @@ const listaMovimentacao = document.getElementById("listaMovimentacao");
 if (listaMovimentacao) {
   mostrarProdutos();
 }
+
 async function carregarHistorico(){
   const listaHistorico = document.getElementById("listaHistorico");
   if(listaHistorico){
