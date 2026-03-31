@@ -2,10 +2,6 @@ import { database } from "./firebase.js";
 import { ref, push, get, remove, update } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
 
 
-console.log("Projeto Firebase:", firebaseConfig.projectId);
-console.log("Database URL:", firebaseConfig.databaseURL);
-
-
 const formProduto = document.getElementById("formProduto");
 document.addEventListener("DOMContentLoaded", function(){
   carregarProdutos();
