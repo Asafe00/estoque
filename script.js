@@ -110,6 +110,7 @@ const formProduto = document.getElementById("formProduto");
 document.addEventListener("DOMContentLoaded", function(){
   carregarProdutos();
   mostrarProdutos();
+  carregarHistorico();
 });
 if(formProduto){
   formProduto.addEventListener("submit", async function(event){
@@ -273,9 +274,9 @@ async function mostrarProdutos(){
 	centroCusto: centro || "Não informado",
         data: new Date().toLocaleString()
       });
-
-      mostrarProdutos();
-      carregarHistorico();
+await carregarProdutos();
+await mostrarProdutos();
+await carregarHistorico();
     });
 
     // 🔹 SAÍDA
@@ -310,9 +311,9 @@ async function mostrarProdutos(){
 	centroCusto: centro || "Não informado",
         data: new Date().toLocaleString()
       });
-
-      mostrarProdutos();
-      carregarHistorico();
+await carregarProdutos();
+await mostrarProdutos();
+await carregarHistorico();
     });
 
     tdMov.appendChild(inputPessoa);
