@@ -392,8 +392,9 @@ async function carregarHistorico(){
       listaHistorico.appendChild(tr);
     }
   }
-
-  carregarHistorico();
+await carregarProdutos();
+await mostrarProdutos();
+await carregarHistorico();
 }
 
 const botaoLimpar = document.getElementById("limparHistorico");
