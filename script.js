@@ -22,6 +22,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
+console.log("Projeto Firebase:", firebaseConfig.projectId);
+console.log("Database URL:", firebaseConfig.databaseURL);
+
 
 const formRegistro = document.getElementById("formRegistro");
 
@@ -139,15 +142,13 @@ if(existe){
     });
 
     // 🔹 RECARREGAR
-    location.reload();
+    formProduto.reset();
+    carregarProdutos();
   });
 }
-
-const listaProdutos = document.getElementById("listaProdutos");
-
-if(listaProdutos){
-
-  async function carregarProdutos(){
+async function carregarProdutos(){
+  const listaProdutos = document.getElementById("listaProdutos");
+  if(listaProdutos){
 
     listaProdutos.innerHTML = "";
 
@@ -178,7 +179,7 @@ if(listaProdutos){
         // 🔹 REMOVE PELO ID DO FIREBASE
         await remove(ref(database, "produtos/" + id));
 
-        location.reload();
+        carregarProdutos();
       });
 
       tdAcao.appendChild(botaoExcluir);
@@ -276,7 +277,8 @@ async function mostrarProdutos(){
         data: new Date().toLocaleString()
       });
 
-      location.reload();
+      mostrarProdutos();
+      carregarHistorico();
     });
 
     // 🔹 SAÍDA
@@ -312,7 +314,8 @@ async function mostrarProdutos(){
         data: new Date().toLocaleString()
       });
 
-      location.reload();
+      mostrarProdutos();
+      carregarHistorico();
     });
 
     tdMov.appendChild(inputPessoa);
@@ -335,12 +338,9 @@ const listaMovimentacao = document.getElementById("listaMovimentacao");
 if (listaMovimentacao) {
   mostrarProdutos();
 }
-
-const listaHistorico = document.getElementById("listaHistorico");
-
-if(listaHistorico){
-
-  async function carregarHistorico(){
+async function carregarHistorico(){
+  const listaHistorico = document.getElementById("listaHistorico");
+  if(listaHistorico){
 
     listaHistorico.innerHTML = "";
 
@@ -416,7 +416,7 @@ if(botaoLimpar){
       // 🔹 REMOVE TODA A PASTA "historico" DO FIREBASE
       await remove(ref(database, "historico"));
 
-      location.reload();
+      carregarHistorico();
     }
 
   });
