@@ -392,7 +392,7 @@ async function carregarHistorico(){
       listaHistorico.appendChild(tr);
     }
   }
-carregarHistorico();
+
 }
 
 const botaoLimpar = document.getElementById("limparHistorico");
