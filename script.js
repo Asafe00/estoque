@@ -107,7 +107,10 @@ if(formLogin){
 
 
 const formProduto = document.getElementById("formProduto");
-
+document.addEventListener("DOMContentLoaded", function(){
+  carregarProdutos();
+  mostrarProdutos();
+});
 if(formProduto){
   formProduto.addEventListener("submit", async function(event){
     event.preventDefault();
