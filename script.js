@@ -330,12 +330,6 @@ async function mostrarProdutos(){
   }
 }
 
-const listaMovimentacao = document.getElementById("listaMovimentacao");
-
-if (listaMovimentacao) {
-  mostrarProdutos();
-}
-
 async function carregarHistorico(){
   const listaHistorico = document.getElementById("listaHistorico");
   if(listaHistorico){
