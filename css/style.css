@@ -218,7 +218,7 @@ thead {
 
 th, td {
     padding: 12px;
-    text-align: left;
+    text-align: center;
 }
 
 th {
@@ -382,7 +382,3 @@ tbody tr:hover {
     box-shadow: 0 6px 14px rgba(239, 68, 68, 0.35);
 }
 
-
-#tabelaMov th{
-	text-align: center;
-}
