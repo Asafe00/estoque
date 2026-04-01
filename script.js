@@ -124,14 +124,6 @@ async function mostrarProdutos(){
     inputNumero.type = "number";
     inputNumero.classList.add("input-numero");
 
-    const botaoAdd = document.createElement("button");
-    botaoAdd.textContent = "+";
-    botaoAdd.classList.add("btn-add");
-
-    const botaoRem = document.createElement("button");
-    botaoRem.textContent = "-";
-    botaoRem.classList.add("btn-rem");
-
     const inputConta = document.createElement("input");
     inputConta.type = "text";
     inputConta.placeholder = "Conta financeira";
@@ -141,6 +133,15 @@ async function mostrarProdutos(){
     inputCentro.type = "text";
     inputCentro.placeholder = "Centro de custo";
     inputCentro.classList.add("input-centro");
+
+    const botaoAdd = document.createElement("button");
+    botaoAdd.textContent = "+";
+    botaoAdd.classList.add("btn-add");
+
+    const botaoRem = document.createElement("button");
+    botaoRem.textContent = "-";
+    botaoRem.classList.add("btn-rem");    
+
 
     // 🔹 ENTRADA
     botaoAdd.addEventListener("click", async function(){
@@ -214,10 +215,10 @@ await carregarHistorico();
 
     tdMov.appendChild(inputPessoa);
     tdMov.appendChild(inputNumero);
-    tdMov.appendChild(botaoAdd);
-    tdMov.appendChild(botaoRem);
     tdMov.appendChild(inputConta);
     tdMov.appendChild(inputCentro);
+    tdMov.appendChild(botaoAdd);
+    tdMov.appendChild(botaoRem);
 
     tr.appendChild(tdNome);
     tr.appendChild(tdQtd);
