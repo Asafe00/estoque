@@ -383,4 +383,6 @@ tbody tr:hover {
 }
 
 
-
+#tabelaMov th{
+	text-align: center;
+}
