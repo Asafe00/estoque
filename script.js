@@ -312,6 +312,8 @@ if(botaoLimpar){
 
 }
 
+
+//Filtrar produtos na movimentação
 const inputPesquisa = document.getElementById("pesquisaProduto");
 
 if (inputPesquisa) {
@@ -334,3 +336,30 @@ function filtrarProdutos() {
     }
   });
 }
+
+
+//Filtrar produtos no estoque
+
+const inputEstoque = document.getElementById("pesquisaEstoque");
+
+if (inputEstoque) {
+  inputEstoque.addEventListener("input", filtrarEstoque);
+}
+
+function filtrarEstoque() {
+  const input = document.getElementById("pesquisaEstoque");
+  const filtro = input.value.toLowerCase();
+
+  const linhas = document.querySelectorAll("#listaProdutos tr");
+
+  linhas.forEach(linha => {
+    const nomeProduto = linha.children[0].textContent.toLowerCase();
+
+    if (nomeProduto.includes(filtro)) {
+      linha.style.display = "";
+    } else {
+      linha.style.display = "none";
+    }
+  });
+}
+
