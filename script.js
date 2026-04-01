@@ -76,7 +76,7 @@ async function carregarProdutos(){
 
     botaoExcluir.addEventListener("click", async function(){
       await remove(ref(database, "produtos/" + id));
-      carregarProdutos(); // ✅ aqui sim faz sentido
+      carregarProdutos();
     });
 
     tdAcao.appendChild(botaoExcluir);
@@ -310,4 +310,27 @@ if(botaoLimpar){
 
   });
 
+}
+
+const inputPesquisa = document.getElementById("pesquisaProduto");
+
+if (inputPesquisa) {
+  inputPesquisa.addEventListener("input", filtrarProdutos);
+}
+
+function filtrarProdutos() {
+  const input = document.getElementById("pesquisaProduto");
+  const filtro = input.value.toLowerCase();
+
+  const linhas = document.querySelectorAll("#listaMovimentacao tr");
+
+  linhas.forEach(linha => {
+    const nomeProduto = linha.children[0].textContent.toLowerCase();
+
+    if (nomeProduto.includes(filtro)) {
+      linha.style.display = "";
+    } else {
+      linha.style.display = "none";
+    }
+  });
 }
