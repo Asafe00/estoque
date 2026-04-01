@@ -113,6 +113,13 @@ body {
     box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
 
+.card1 {
+    background: var(--bg-secondary);
+    padding: 20px;
+    border-radius: var(--radius);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
 .card h2 {
     margin-bottom: 15px;
 }
