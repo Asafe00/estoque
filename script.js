@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", function(){
   carregarProdutos();
   mostrarProdutos();
   carregarHistorico();
+  carregarMinimos();
 });
 if(formProduto){
   formProduto.addEventListener("submit", async function(event){
