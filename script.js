@@ -14,6 +14,7 @@ if(formProduto){
 
     const nomeProduto = document.getElementById("produto").value;
     const quantidade = document.getElementById("quantidade").value;
+    const quantidadeMin = document.getElementById("quantidademin").value;
 
     const snapshot = await get(ref(database, "produtos"));
 
@@ -38,7 +39,8 @@ if(existe){
     // 🔹 SALVAR DIRETO NO FIREBASE
     await push(ref(database, "produtos"), {
       nome: nomeProduto,
-      quantidade: Number(quantidade)
+      quantidade: Number(quantidade),
+      quantidadeMinima: Number(quantidadeMin)
     });
 
     // 🔹 RECARREGAR
@@ -174,6 +176,7 @@ async function mostrarProdutos(){
 await carregarProdutos();
 await mostrarProdutos();
 await carregarHistorico();
+await carregarMinimos();
     });
 
     // 🔹 SAÍDA
@@ -211,6 +214,7 @@ await carregarHistorico();
 await carregarProdutos();
 await mostrarProdutos();
 await carregarHistorico();
+await carregarMinimos();
     });
 
     tdMov.appendChild(inputPessoa);
@@ -361,5 +365,52 @@ function filtrarEstoque() {
       linha.style.display = "none";
     }
   });
+}
+
+async function carregarMinimos(){
+  const lista = document.getElementById("listaMinimos");
+  if(!lista) return;
+
+  lista.innerHTML = "";
+
+  const snapshot = await get(ref(database, "produtos"));
+
+  if(!snapshot.exists()) return;
+
+  const produtos = snapshot.val();
+
+  for(let id in produtos){
+
+    const produto = produtos[id];
+
+    const qtd = Number(produto.quantidade);
+    const min = Number(produto.quantidadeMinima);
+
+    if(qtd <= min){
+
+      const tr = document.createElement("tr");
+      tr.classList.add("linha-baixa");
+
+      const tdNome = document.createElement("td");
+      tdNome.textContent = produto.nome;
+
+      const tdQtd = document.createElement("td");
+      tdQtd.textContent = qtd;
+
+      const tdMin = document.createElement("td");
+      tdMin.textContent = min;
+
+      const tdStatus = document.createElement("td");
+      tdStatus.textContent = "BAIXO";
+      tdStatus.classList.add("status-baixo");
+
+      tr.appendChild(tdNome);
+      tr.appendChild(tdQtd);
+      tr.appendChild(tdMin);
+      tr.appendChild(tdStatus);
+
+      lista.appendChild(tr);
+    }
+  }
 }
 
