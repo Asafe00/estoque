@@ -445,6 +445,11 @@ tbody tr:hover {
   border: none;
   cursor: pointer;
   font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.btn-expandir.aberto {
+  transform: rotate(180deg);
 }
 
 .linha-historico td {

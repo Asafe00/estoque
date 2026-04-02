@@ -409,18 +409,23 @@ async function carregarMinimos(){
       const botaoExpandir = document.createElement("button");
       botaoExpandir.textContent = "▼";
       botaoExpandir.classList.add("btn-expandir");
+      botaoExpandir.classList.toggle("aberto");
 
       tdExpandir.appendChild(botaoExpandir);
 
 botaoExpandir.addEventListener("click", async function(){
 
-  // se já estiver aberto → fecha
   const proximaLinha = tr.nextSibling;
 
+  // 🔹 SE JÁ ESTIVER ABERTO → FECHA
   if(proximaLinha && proximaLinha.classList?.contains("linha-historico")){
     proximaLinha.remove();
+    botaoExpandir.textContent = "▼"; // 👈 volta pra baixo
     return;
   }
+
+  // 🔹 MUDA A SETA PRA CIMA
+  botaoExpandir.textContent = "▲";
 
   // 🔹 busca histórico
   const snapshotHist = await get(ref(database, "historico"));
@@ -441,16 +446,17 @@ botaoExpandir.addEventListener("click", async function(){
     const item = historico[h];
 
     if(item.produto === produto.nome){
-      html += `
-        <div class="item-historico">
-          <b>${item.tipo}</b> | 
-          ${item.quantidade} | 
-          ${item.responsavel} | 
-          ${item.contaFinanceira} | 
-          ${item.centroCusto} | 
-          ${item.data}
-        </div>
-      `;
+html += `
+  <div class="item-historico">
+    <b>${item.tipo}</b> | 
+    Qtd: ${item.quantidade} | 
+    Estoque: ${item.estoqueFinal} | 
+    ${item.responsavel} | 
+    ${item.contaFinanceira || "—"} | 
+    ${item.centroCusto || "—"} | 
+    ${item.data}
+  </div>
+`;
     }
   }
 
