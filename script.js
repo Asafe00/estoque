@@ -402,13 +402,74 @@ async function carregarMinimos(){
       tdMin.textContent = min;
 
       const tdStatus = document.createElement("td");
-      tdStatus.textContent = "BAIXO";
+      tdStatus.textContent = "REPOR";
       tdStatus.classList.add("status-baixo");
+
+      const tdExpandir = document.createElement("td");
+      const botaoExpandir = document.createElement("button");
+      botaoExpandir.textContent = "▼";
+      botaoExpandir.classList.add("btn-expandir");
+
+      tdExpandir.appendChild(botaoExpandir);
+
+botaoExpandir.addEventListener("click", async function(){
+
+  // se já estiver aberto → fecha
+  const proximaLinha = tr.nextSibling;
+
+  if(proximaLinha && proximaLinha.classList?.contains("linha-historico")){
+    proximaLinha.remove();
+    return;
+  }
+
+  // 🔹 busca histórico
+  const snapshotHist = await get(ref(database, "historico"));
+  if(!snapshotHist.exists()) return;
+
+  const historico = snapshotHist.val();
+
+  // 🔹 cria linha expandida
+  const trHist = document.createElement("tr");
+  trHist.classList.add("linha-historico");
+
+  const tdHist = document.createElement("td");
+  tdHist.colSpan = 5; // ajusta conforme número de colunas
+
+  let html = "<div class='box-historico'>";
+
+  for(let h in historico){
+    const item = historico[h];
+
+    if(item.produto === produto.nome){
+      html += `
+        <div class="item-historico">
+          <b>${item.tipo}</b> | 
+          ${item.quantidade} | 
+          ${item.responsavel} | 
+          ${item.contaFinanceira} | 
+          ${item.centroCusto} | 
+          ${item.data}
+        </div>
+      `;
+    }
+  }
+
+  html += "</div>";
+
+  tdHist.innerHTML = html;
+  trHist.appendChild(tdHist);
+
+  // 🔹 insere logo abaixo da linha clicada
+  tr.parentNode.insertBefore(trHist, tr.nextSibling);
+});
+
+
 
       tr.appendChild(tdNome);
       tr.appendChild(tdQtd);
       tr.appendChild(tdMin);
       tr.appendChild(tdStatus);
+      tr.appendChild(tdExpandir);
 
       lista.appendChild(tr);
     }
