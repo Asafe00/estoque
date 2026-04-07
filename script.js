@@ -448,11 +448,13 @@ let html = `
   <table class="tabela-historico">
     <thead>
       <tr>
-        <th>Tipo</th>
-        <th>Estoque</th>
-        <th>Mov</th>
-        <th>Responsável</th>
-        <th>Data</th>
+        <th>Operação</th>
+	<th>Responsável</th>
+	<th>Conta Financeira</th>
+	<th>Centro de Custo</th>
+	<th>Quantidade</th>
+	<th>Estoque após</th>
+	<th>Data</th>
       </tr>
     </thead>
     <tbody>
@@ -484,9 +486,11 @@ for(let item of ultimos){
   html += `
     <tr>
       <td>${item.tipo}</td>
-      <td>${item.estoqueAnterior ?? "?"} → ${item.estoqueFinal}</td>
-      <td>${item.quantidade}</td>
       <td>${item.responsavel}</td>
+      <td>${item.contaFinanceira || "—"}</td>
+      <td>${item.centroCusto || "—"}</td>
+      <td>${item.quantidade}</td>
+      <td>${item.estoqueFinal}</td>
       <td>${item.data}</td>
     </tr>
   `;
