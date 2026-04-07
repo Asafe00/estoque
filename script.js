@@ -153,6 +153,7 @@ async function mostrarProdutos(){
       const pessoa = inputPessoa.value;
       const conta = inputConta.value;
       const centro = inputCentro.value;
+      const estoqueAnterior = produto.quantidade;
 
       if(!valor) return;
 
@@ -169,6 +170,7 @@ async function mostrarProdutos(){
         tipo: "Entrada",
         responsavel: pessoa || "Não Informado",
         quantidade: valor,
+        estoqueAnterior: estoqueAnterior,
         estoqueFinal: novaQuantidade,
 	contaFinanceira: conta || "Não informado",
 	centroCusto: centro || "Não informado",
@@ -187,6 +189,7 @@ await carregarMinimos();
       const pessoa = inputPessoa.value;
       const conta = inputConta.value;
       const centro = inputCentro.value;
+      const estoqueAnterior = produto.quantidade;
 
       if(!valor) return;
 
@@ -207,6 +210,7 @@ await carregarMinimos();
         tipo: "Saída",
         responsavel: pessoa || "Não informado",
         quantidade: valor,
+        estoqueAnterior: estoqueAnterior,
         estoqueFinal: novaQuantidade,
 	contaFinanceira: conta || "Não informado",
 	centroCusto: centro || "Não informado",
@@ -440,25 +444,53 @@ botaoExpandir.addEventListener("click", async function(){
   const tdHist = document.createElement("td");
   tdHist.colSpan = 5; // ajusta conforme número de colunas
 
-  let html = "<div class='box-historico'>";
+let html = `
+  <div class="box-historico">
+    <div class="titulo-historico">Histórico de Movimentações</div>
 
-  for(let h in historico){
-    const item = historico[h];
-
-    if(item.produto === produto.nome){
-html += `
-  <div class="item-historico">
-    <b>${item.tipo}</b> | 
-    Qtd: ${item.quantidade} | 
-    Estoque: ${item.estoqueFinal} | 
-    ${item.responsavel} | 
-    ${item.contaFinanceira || "—"} | 
-    ${item.centroCusto || "—"} | 
-    ${item.data}
-  </div>
+    <div class="header-historico">
+      <span>Tipo</span>
+      <span>Estoque</span>
+      <span>Mov</span>
+      <span>Responsável</span>
+      <span>Data</span>
+    </div>
 `;
-    }
+
+const listaFiltrada = [];
+
+// 🔹 filtra só o produto atual
+for(let h in historico){
+  const item = historico[h];
+
+  if(item.produto === produto.nome){
+    listaFiltrada.push(item);
   }
+}
+
+// 🔹 ordena (se tiver timestamp usa ele, senão tenta pela data)
+listaFiltrada.sort((a, b) => {
+  if(a.timestamp && b.timestamp){
+    return b.timestamp - a.timestamp;
+  }
+  return new Date(b.data) - new Date(a.data);
+});
+
+// 🔹 pega só os 5 últimos
+const ultimos = listaFiltrada.slice(0, 5);
+
+// 🔹 monta o HTML
+for(let item of ultimos){
+  html += `
+    <div class="item-historico">
+      <span><b>${item.tipo}</b></span>
+      <span>${item.estoqueAnterior ?? "?"} → ${item.estoqueFinal}</span>
+      <span>Mov: ${item.quantidade}</span>
+      <span>${item.responsavel}</span>
+      <span>${item.data}</span>
+    </div>
+  `;
+}
 
   html += "</div>";
 
