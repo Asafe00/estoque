@@ -485,7 +485,9 @@ const ultimos = listaFiltrada.slice(0, 5);
 for(let item of ultimos){
   html += `
     <tr>
-      <td>${item.tipo}</td>
+      <td class="${item.tipo === 'Entrada' ? 'entrada' : 'saida'}">
+  	${item.tipo}
+      </td>
       <td>${item.responsavel}</td>
       <td>${item.contaFinanceira || "—"}</td>
       <td>${item.centroCusto || "—"}</td>
