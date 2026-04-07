@@ -445,16 +445,17 @@ botaoExpandir.addEventListener("click", async function(){
   tdHist.colSpan = 5; // ajusta conforme número de colunas
 
 let html = `
-  <div class="box-historico">
-    <div class="titulo-historico">Histórico de Movimentações</div>
-
-    <div class="header-historico">
-      <span>Tipo</span>
-      <span>Estoque</span>
-      <span>Mov</span>
-      <span>Responsável</span>
-      <span>Data</span>
-    </div>
+  <table class="tabela-historico">
+    <thead>
+      <tr>
+        <th>Tipo</th>
+        <th>Estoque</th>
+        <th>Mov</th>
+        <th>Responsável</th>
+        <th>Data</th>
+      </tr>
+    </thead>
+    <tbody>
 `;
 
 const listaFiltrada = [];
@@ -479,20 +480,22 @@ listaFiltrada.sort((a, b) => {
 // 🔹 pega só os 5 últimos
 const ultimos = listaFiltrada.slice(0, 5);
 
-// 🔹 monta o HTML
 for(let item of ultimos){
   html += `
-    <div class="item-historico">
-      <span><b>${item.tipo}</b></span>
-      <span>${item.estoqueAnterior ?? "?"} → ${item.estoqueFinal}</span>
-      <span>Mov: ${item.quantidade}</span>
-      <span>${item.responsavel}</span>
-      <span>${item.data}</span>
-    </div>
+    <tr>
+      <td>${item.tipo}</td>
+      <td>${item.estoqueAnterior ?? "?"} → ${item.estoqueFinal}</td>
+      <td>${item.quantidade}</td>
+      <td>${item.responsavel}</td>
+      <td>${item.data}</td>
+    </tr>
   `;
 }
 
-  html += "</div>";
+  html += `
+    </tbody>
+  </table>
+`;
 
   tdHist.innerHTML = html;
   trHist.appendChild(tdHist);
