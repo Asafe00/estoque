@@ -1,8 +1,8 @@
-import "./firebase.js";
+import { app } from "./firebase.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
 from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
-const auth = getAuth();
+const auth = getAuth(app);
 
 
 // 🔹 REGISTRO
