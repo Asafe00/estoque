@@ -1,6 +1,14 @@
 import { database } from "./firebase.js";
 import { ref, push, get, remove, update } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+import { getAuth, signOut } 
+from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
+const auth = getAuth();
+
+// 👇 deixa global pra usar no botão
+window.logout = function(){
+  signOut(auth);
+};
 
 const formProduto = document.getElementById("formProduto");
 document.addEventListener("DOMContentLoaded", function(){

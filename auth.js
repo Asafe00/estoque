@@ -1,5 +1,8 @@
-import { database } from "./firebase.js";
-import { ref, push, get } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+const auth = getAuth();
+
 
 // 🔹 REGISTRO
 const formRegistro = document.getElementById("formRegistro");
@@ -11,35 +14,26 @@ if (formRegistro){
     const nome = document.getElementById("nome").value;
     const senha = document.getElementById("senha").value;
 
-    const snapshot = await get(ref(database, "usuarios"));
+    // 🔥 Firebase precisa de email → adaptamos
+    const email = nome + "@sistema.com";
 
-    let usuarioExiste = false;
+    try {
+      await createUserWithEmailAndPassword(auth, email, senha);
 
-    if (snapshot.exists()) {
-      const usuarios = snapshot.val();
+      alert("Usuário registrado!");
+      window.location.href = "/index.html";
 
-      for (let id in usuarios) {
-        if (usuarios[id].nome === nome) {
-          usuarioExiste = true;
-          break;
-        }
+    } catch (erro){
+      if(erro.code === "auth/email-already-in-use"){
+        alert("Esse usuário já existe!");
+      } else {
+        alert("Erro ao registrar");
+        console.error(erro);
       }
     }
-
-    if (usuarioExiste){
-      alert("Esse nome já está cadastrado!");
-      return;
-    }
-
-    await push(ref(database, "usuarios"), {
-      nome: nome,
-      senha: senha
-    });
-
-    alert("Usuário registrado!");
-    window.location.href = "/index.html";
   });
 }
+
 
 // 🔹 LOGIN
 const formLogin = document.getElementById("formLogin");
@@ -51,29 +45,17 @@ if(formLogin){
     const nomeDigitado = document.getElementById("loginNome").value;
     const senhaDigitada = document.getElementById("loginSenha").value;
 
-    const snapshot = await get(ref(database, "usuarios"));
+    const email = nomeDigitado + "@sistema.com";
 
-    let usuarioEncontrado = false;
+    try {
+      await signInWithEmailAndPassword(auth, email, senhaDigitada);
 
-    if (snapshot.exists()) {
-      const usuarios = snapshot.val();
-
-      for (let id in usuarios) {
-        if (
-          usuarios[id].nome === nomeDigitado &&
-          usuarios[id].senha === senhaDigitada
-        ){
-          usuarioEncontrado = true;
-          break;
-        }
-      }
-    }
-
-    if(usuarioEncontrado){
       alert("Login realizado com sucesso!");
       window.location.href = "/index.html";
-    } else {
-      alert("Usuário não encontrado!");
+
+    } catch (erro){
+      alert("Usuário ou senha inválidos!");
+      console.error(erro);
     }
   });
 }
