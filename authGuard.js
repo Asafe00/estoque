@@ -5,6 +5,6 @@ const auth = getAuth();
 
 onAuthStateChanged(auth, (user) => {
   if (!user) {
-    window.location.href = "/paginas/login.html";
+    window.location.href = "Estoque/paginas/login.html";
   }
 });
