@@ -1,4 +1,4 @@
-import { app } from "./firebase.js";
+import { app } from "/estoque/firebase.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
 from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
