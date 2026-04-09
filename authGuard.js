@@ -2,6 +2,7 @@ import { app } from "/estoque/firebase.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
 from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
+const paginaAtual = window.location.pathname;
 const auth = getAuth(app);
 
 const paginasPublicas = ["login.html", "registrar.html"];
