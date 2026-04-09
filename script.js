@@ -1,120 +1,115 @@
 import { database } from "./firebase.js";
-import { ref, push, get, remove, update } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
-import { getAuth, signOut } 
-from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import { ref, push, get, remove, update, onValue }
+  from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+import { getAuth, signOut }
+  from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
 const auth = getAuth();
+window.logout = function(){ signOut(auth); };
 
-// 👇 deixa global pra usar no botão
-window.logout = function(){
-  signOut(auth);
-};
+// ─── Cache local ────────────────────────────────────────────────
+let cacheProdutos  = {};   // { id: { nome, quantidade, quantidadeMinima } }
+let cacheHistorico = {};   // { id: { … } }
 
-const formProduto = document.getElementById("formProduto");
-document.addEventListener("DOMContentLoaded", function(){
-  carregarProdutos();
-  mostrarProdutos();
-  carregarHistorico();
-  carregarMinimos();
+// ─── Inicialização ──────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", async function(){
+  mostrarCarregando(true);
+
+  // UMA só viagem para produtos + UMA para histórico, em paralelo
+  const [snapProd, snapHist] = await Promise.all([
+    get(ref(database, "produtos")),
+    get(ref(database, "historico"))
+  ]);
+
+  cacheProdutos  = snapProd.exists()  ? snapProd.val()  : {};
+  cacheHistorico = snapHist.exists()  ? snapHist.val()  : {};
+
+  renderizarEstoque();
+  renderizarMovimentacao();
+  renderizarHistorico();
+  renderizarMinimos();
+
+  mostrarCarregando(false);
 });
+
+function mostrarCarregando(ativo){
+  const el = document.getElementById("loadingIndicator");
+  if(el) el.style.display = ativo ? "block" : "none";
+}
+
+// ─── Formulário: adicionar produto ──────────────────────────────
+const formProduto = document.getElementById("formProduto");
 if(formProduto){
-  formProduto.addEventListener("submit", async function(event){
-    event.preventDefault();
+  formProduto.addEventListener("submit", async function(e){
+    e.preventDefault();
 
-    const nomeProduto = document.getElementById("produto").value;
-    const quantidade = document.getElementById("quantidade").value;
-    const quantidadeMin = document.getElementById("quantidademin").value;
+    const nome  = document.getElementById("produto").value.trim();
+    const qtd   = Number(document.getElementById("quantidade").value);
+    const min   = Number(document.getElementById("quantidademin").value);
 
-    const snapshot = await get(ref(database, "produtos"));
+    // Verifica duplicata no cache local — sem ir ao Firebase
+    const existe = Object.values(cacheProdutos).some(p => p.nome === nome);
+    if(existe){ alert("Produto já existe!"); return; }
 
-let existe = false;
-
-if(snapshot.exists()){
-  const produtos = snapshot.val();
-
-  for(let id in produtos){
-    if(produtos[id].nome === nomeProduto){
-      existe = true;
-      break;
-    }
-  }
-}
-
-if(existe){
-  alert("Produto já existe!");
-  return;
-}
-
-    // 🔹 SALVAR DIRETO NO FIREBASE
-    await push(ref(database, "produtos"), {
-      nome: nomeProduto,
-      quantidade: Number(quantidade),
-      quantidadeMinima: Number(quantidadeMin)
+    const novoRef = await push(ref(database, "produtos"), {
+      nome, quantidade: qtd, quantidadeMinima: min
     });
 
-    // 🔹 RECARREGAR
+    // Atualiza cache e re-renderiza sem nova requisição
+    cacheProdutos[novoRef.key] = { nome, quantidade: qtd, quantidadeMinima: min };
+
     formProduto.reset();
-    carregarProdutos();
+    renderizarEstoque();
+    renderizarMovimentacao();
+    renderizarMinimos();
   });
 }
-async function carregarProdutos(){
-  const listaProdutos = document.getElementById("listaProdutos");
-  if(!listaProdutos) return;
 
-  listaProdutos.innerHTML = "";
+// ─── Render: tabela de estoque ──────────────────────────────────
+function renderizarEstoque(){
+  const lista = document.getElementById("listaProdutos");
+  if(!lista) return;
 
-  const snapshot = await get(ref(database, "produtos"));
+  lista.innerHTML = "";
 
-  if(!snapshot.exists()) return;
-
-  const produtos = snapshot.val();
-
-  for(let id in produtos){
+  for(let id in cacheProdutos){
+    const p = cacheProdutos[id];
 
     const tr = document.createElement("tr");
 
     const tdNome = document.createElement("td");
-    tdNome.textContent = produtos[id].nome;
+    tdNome.textContent = p.nome;
 
     const tdQtd = document.createElement("td");
-    tdQtd.textContent = produtos[id].quantidade;
+    tdQtd.textContent = p.quantidade;
 
     const tdAcao = document.createElement("td");
-
     const botaoExcluir = document.createElement("button");
     botaoExcluir.textContent = "Excluir";
     botaoExcluir.classList.add("botaoexcluir");
-
     botaoExcluir.addEventListener("click", async function(){
       await remove(ref(database, "produtos/" + id));
-      carregarProdutos();
+      delete cacheProdutos[id];           // remove do cache
+      renderizarEstoque();
+      renderizarMovimentacao();
+      renderizarMinimos();
     });
 
     tdAcao.appendChild(botaoExcluir);
-
-    tr.appendChild(tdNome);
-    tr.appendChild(tdQtd);
-    tr.appendChild(tdAcao);
-
-    listaProdutos.appendChild(tr);
+    tr.append(tdNome, tdQtd, tdAcao);
+    lista.appendChild(tr);
   }
 }
 
-async function mostrarProdutos(){
-  const listaMovimentacao = document.getElementById("listaMovimentacao");
-  if(!listaMovimentacao) return;
+// ─── Render: tabela de movimentação ─────────────────────────────
+function renderizarMovimentacao(){
+  const lista = document.getElementById("listaMovimentacao");
+  if(!lista) return;
 
-  listaMovimentacao.innerHTML = "";
+  lista.innerHTML = "";
 
-  const snapshot = await get(ref(database, "produtos"));
-
-  if(!snapshot.exists()) return;
-
-  const produtos = snapshot.val();
-
-  for(let id in produtos){
-
-    const produto = produtos[id];
+  for(let id in cacheProdutos){
+    const produto = cacheProdutos[id];
 
     const tr = document.createElement("tr");
 
@@ -123,27 +118,14 @@ async function mostrarProdutos(){
 
     const tdQtd = document.createElement("td");
     tdQtd.textContent = produto.quantidade;
+    tdQtd.dataset.id = id;               // marca para atualização pontual
 
     const tdMov = document.createElement("td");
 
-    const inputPessoa = document.createElement("input");
-    inputPessoa.type = "text";
-    inputPessoa.placeholder = "Responsável";
-    inputPessoa.classList.add("input-pessoa");
-
-    const inputNumero = document.createElement("input");
-    inputNumero.type = "number";
-    inputNumero.classList.add("input-numero");
-
-    const inputConta = document.createElement("input");
-    inputConta.type = "text";
-    inputConta.placeholder = "Conta financeira";
-    inputConta.classList.add("input-conta");
-
-    const inputCentro = document.createElement("input");
-    inputCentro.type = "text";
-    inputCentro.placeholder = "Centro de custo";
-    inputCentro.classList.add("input-centro");
+    const inputPessoa  = criarInput("text",   "Responsável",      "input-pessoa");
+    const inputNumero  = criarInput("number", "",                 "input-numero");
+    const inputConta   = criarInput("text",   "Conta financeira", "input-conta");
+    const inputCentro  = criarInput("text",   "Centro de custo",  "input-centro");
 
     const botaoAdd = document.createElement("button");
     botaoAdd.textContent = "+";
@@ -151,383 +133,220 @@ async function mostrarProdutos(){
 
     const botaoRem = document.createElement("button");
     botaoRem.textContent = "-";
-    botaoRem.classList.add("btn-rem");    
+    botaoRem.classList.add("btn-rem");
 
-
-    // 🔹 ENTRADA
-    botaoAdd.addEventListener("click", async function(){
-
+    async function registrarMovimentacao(tipo){
       const valor = Number(inputNumero.value);
-      const pessoa = inputPessoa.value;
-      const conta = inputConta.value;
-      const centro = inputCentro.value;
-      const estoqueAnterior = produto.quantidade;
-
       if(!valor) return;
 
-      const novaQuantidade = Number(produto.quantidade) + valor;
+      const estoqueAnterior = Number(produto.quantidade);
+      let novaQtd = tipo === "Entrada"
+        ? estoqueAnterior + valor
+        : Math.max(0, estoqueAnterior - valor);
 
-      // 🔹 ATUALIZA PRODUTO
-      await update(ref(database, "produtos/" + id), {
-        quantidade: novaQuantidade
-      });
-
-      // 🔹 SALVA HISTÓRICO
-      await push(ref(database, "historico"), {
+      const entrada = {
         produto: produto.nome,
-        tipo: "Entrada",
-        responsavel: pessoa || "Não Informado",
+        tipo,
+        responsavel: inputPessoa.value || "Não informado",
         quantidade: valor,
-        estoqueAnterior: estoqueAnterior,
-        estoqueFinal: novaQuantidade,
-	contaFinanceira: conta || "Não informado",
-	centroCusto: centro || "Não informado",
-        data: new Date().toLocaleString()
-      });
-await carregarProdutos();
-await mostrarProdutos();
-await carregarHistorico();
-await carregarMinimos();
-    });
+        estoqueAnterior,
+        estoqueFinal: novaQtd,
+        contaFinanceira: inputConta.value || "Não informado",
+        centroCusto: inputCentro.value || "Não informado",
+        data: new Date().toLocaleString(),
+        timestamp: Date.now()
+      };
 
-    // 🔹 SAÍDA
-    botaoRem.addEventListener("click", async function(){
+      // Duas escritas em paralelo
+      const [, novoHistRef] = await Promise.all([
+        update(ref(database, "produtos/" + id), { quantidade: novaQtd }),
+        push(ref(database, "historico"), entrada)
+      ]);
 
-      const valor = Number(inputNumero.value);
-      const pessoa = inputPessoa.value;
-      const conta = inputConta.value;
-      const centro = inputCentro.value;
-      const estoqueAnterior = produto.quantidade;
+      // Atualiza cache
+      cacheProdutos[id].quantidade = novaQtd;
+      cacheHistorico[novoHistRef.key] = entrada;
 
-      if(!valor) return;
+      // Atualiza SOMENTE as células afetadas — sem recarregar nada
+      tdQtd.textContent = novaQtd;
+      produto.quantidade = novaQtd;   // mantém referência local em sincronia
 
-      let novaQuantidade = Number(produto.quantidade) - valor;
+      // Histórico e mínimos precisam refletir a mudança
+      renderizarHistorico();
+      renderizarMinimos();
 
-      if(novaQuantidade < 0){
-        novaQuantidade = 0;
-      }
+      inputNumero.value = "";
+    }
 
-      // 🔹 ATUALIZA PRODUTO
-      await update(ref(database, "produtos/" + id), {
-        quantidade: novaQuantidade
-      });
+    botaoAdd.addEventListener("click", () => registrarMovimentacao("Entrada"));
+    botaoRem.addEventListener("click", () => registrarMovimentacao("Saída"));
 
-      // 🔹 SALVA HISTÓRICO
-      await push(ref(database, "historico"), {
-        produto: produto.nome,
-        tipo: "Saída",
-        responsavel: pessoa || "Não informado",
-        quantidade: valor,
-        estoqueAnterior: estoqueAnterior,
-        estoqueFinal: novaQuantidade,
-	contaFinanceira: conta || "Não informado",
-	centroCusto: centro || "Não informado",
-        data: new Date().toLocaleString()
-      });
-await carregarProdutos();
-await mostrarProdutos();
-await carregarHistorico();
-await carregarMinimos();
-    });
-
-    tdMov.appendChild(inputPessoa);
-    tdMov.appendChild(inputNumero);
-    tdMov.appendChild(inputConta);
-    tdMov.appendChild(inputCentro);
-    tdMov.appendChild(botaoAdd);
-    tdMov.appendChild(botaoRem);
-
-    tr.appendChild(tdNome);
-    tr.appendChild(tdQtd);
-    tr.appendChild(tdMov);
-
-    listaMovimentacao.appendChild(tr);
+    tdMov.append(inputPessoa, inputNumero, inputConta, inputCentro, botaoAdd, botaoRem);
+    tr.append(tdNome, tdQtd, tdMov);
+    lista.appendChild(tr);
   }
 }
 
-async function carregarHistorico(){
-  const listaHistorico = document.getElementById("listaHistorico");
-  if(listaHistorico){
+// ─── Render: histórico ───────────────────────────────────────────
+function renderizarHistorico(){
+  const lista = document.getElementById("listaHistorico");
+  if(!lista) return;
 
-    listaHistorico.innerHTML = "";
+  lista.innerHTML = "";
 
-    const snapshot = await get(ref(database, "historico"));
+  // Ordena do mais recente para o mais antigo
+  const itens = Object.values(cacheHistorico).sort((a, b) =>
+    (b.timestamp || 0) - (a.timestamp || 0)
+  );
 
-    if(!snapshot.exists()) return;
+  for(let item of itens){
+    const tr = document.createElement("tr");
 
-    const historico = snapshot.val();
+    const tdTipo = document.createElement("td");
+    tdTipo.textContent = item.tipo;
+    tdTipo.classList.add(item.tipo === "Entrada" ? "entrada" : "saida");
 
-    for(let id in historico){
+    tr.append(
+      td(item.produto),
+      tdTipo,
+      td(item.responsavel),
+      td(item.contaFinanceira || "—"),
+      td(item.centroCusto    || "—"),
+      td(item.quantidade),
+      td(item.estoqueFinal),
+      td(item.data)
+    );
 
-      const item = historico[id];
-
-      const tr = document.createElement("tr");
-
-      const tdProduto = document.createElement("td");
-      tdProduto.textContent = item.produto;
-
-      const tdTipo = document.createElement("td");
-      tdTipo.textContent = item.tipo;
-
-      if(item.tipo === "Entrada"){
-        tdTipo.classList.add("entrada");
-      }
-      if(item.tipo === "Saída"){
-        tdTipo.classList.add("saida");
-      }
-
-      const tdResponsavel = document.createElement("td");
-      tdResponsavel.textContent = item.responsavel;
-   
-      const tdConta = document.createElement("td");
-      tdConta.textContent = item.contaFinanceira || "—";
-
-      const tdCentro = document.createElement("td");
-      tdCentro.textContent = item.centroCusto || "—";
-
-      const tdQtd = document.createElement("td");
-      tdQtd.textContent = item.quantidade;
-
-      const tdEstoque = document.createElement("td");
-      tdEstoque.textContent = item.estoqueFinal;
-
-      const tdData = document.createElement("td");
-      tdData.textContent = item.data;
-
-      tr.appendChild(tdProduto);
-      tr.appendChild(tdTipo);
-      tr.appendChild(tdResponsavel);
-      tr.appendChild(tdConta);    
-      tr.appendChild(tdCentro);   
-      tr.appendChild(tdQtd);
-      tr.appendChild(tdEstoque);
-      tr.appendChild(tdData);
-      
-      listaHistorico.appendChild(tr);
-    }
+    lista.appendChild(tr);
   }
-
 }
 
-const botaoLimpar = document.getElementById("limparHistorico");
-
-if(botaoLimpar){
-
-  botaoLimpar.addEventListener("click", async function(){
-
-    const confirmar = confirm("Deseja apagar todo o histórico?");
-
-    if(confirmar){
-
-      // 🔹 REMOVE TODA A PASTA "historico" DO FIREBASE
-      await remove(ref(database, "historico"));
-
-      carregarHistorico();
-    }
-
-  });
-
-}
-
-
-//Filtrar produtos na movimentação
-const inputPesquisa = document.getElementById("pesquisaProduto");
-
-if (inputPesquisa) {
-  inputPesquisa.addEventListener("input", filtrarProdutos);
-}
-
-function filtrarProdutos() {
-  const input = document.getElementById("pesquisaProduto");
-  const filtro = input.value.toLowerCase();
-
-  const linhas = document.querySelectorAll("#listaMovimentacao tr");
-
-  linhas.forEach(linha => {
-    const nomeProduto = linha.children[0].textContent.toLowerCase();
-
-    if (nomeProduto.includes(filtro)) {
-      linha.style.display = "";
-    } else {
-      linha.style.display = "none";
-    }
-  });
-}
-
-
-//Filtrar produtos no estoque
-
-const inputEstoque = document.getElementById("pesquisaEstoque");
-
-if (inputEstoque) {
-  inputEstoque.addEventListener("input", filtrarEstoque);
-}
-
-function filtrarEstoque() {
-  const input = document.getElementById("pesquisaEstoque");
-  const filtro = input.value.toLowerCase();
-
-  const linhas = document.querySelectorAll("#listaProdutos tr");
-
-  linhas.forEach(linha => {
-    const nomeProduto = linha.children[0].textContent.toLowerCase();
-
-    if (nomeProduto.includes(filtro)) {
-      linha.style.display = "";
-    } else {
-      linha.style.display = "none";
-    }
-  });
-}
-
-async function carregarMinimos(){
+// ─── Render: mínimos ─────────────────────────────────────────────
+function renderizarMinimos(){
   const lista = document.getElementById("listaMinimos");
   if(!lista) return;
 
   lista.innerHTML = "";
 
-  const snapshot = await get(ref(database, "produtos"));
-
-  if(!snapshot.exists()) return;
-
-  const produtos = snapshot.val();
-
-  for(let id in produtos){
-
-    const produto = produtos[id];
-
+  for(let id in cacheProdutos){
+    const produto = cacheProdutos[id];
     const qtd = Number(produto.quantidade);
     const min = Number(produto.quantidadeMinima);
 
-    if(qtd <= min){
+    if(qtd > min) continue;
 
-      const tr = document.createElement("tr");
-      tr.classList.add("linha-baixa");
+    const tr = document.createElement("tr");
+    tr.classList.add("linha-baixa");
 
-      const tdNome = document.createElement("td");
-      tdNome.textContent = produto.nome;
+    const tdExpandir = document.createElement("td");
+    const botaoExpandir = document.createElement("button");
+    botaoExpandir.textContent = "▼";
+    botaoExpandir.classList.add("btn-expandir");
 
-      const tdQtd = document.createElement("td");
-      tdQtd.textContent = qtd;
+    botaoExpandir.addEventListener("click", function(){
+      const proxima = tr.nextSibling;
 
-      const tdMin = document.createElement("td");
-      tdMin.textContent = min;
+      if(proxima?.classList?.contains("linha-historico")){
+        proxima.remove();
+        botaoExpandir.textContent = "▼";
+        return;
+      }
 
-      const tdStatus = document.createElement("td");
-      tdStatus.textContent = "REPOR";
-      tdStatus.classList.add("status-baixo");
+      botaoExpandir.textContent = "▲";
 
-      const tdExpandir = document.createElement("td");
-      const botaoExpandir = document.createElement("button");
-      botaoExpandir.textContent = "▼";
-      botaoExpandir.classList.add("btn-expandir");
-      botaoExpandir.classList.toggle("aberto");
+      // Usa o cache local — sem nova requisição ao Firebase
+      const filtrado = Object.values(cacheHistorico)
+        .filter(h => h.produto === produto.nome)
+        .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+        .slice(0, 5);
 
-      tdExpandir.appendChild(botaoExpandir);
+      const trHist = document.createElement("tr");
+      trHist.classList.add("linha-historico");
 
-botaoExpandir.addEventListener("click", async function(){
+      const tdHist = document.createElement("td");
+      tdHist.colSpan = 5;
+      tdHist.innerHTML = `
+        <table class="tabela-historico">
+          <thead><tr>
+            <th>Operação</th><th>Responsável</th><th>Conta Financeira</th>
+            <th>Centro de Custo</th><th>Quantidade</th><th>Estoque após</th><th>Data</th>
+          </tr></thead>
+          <tbody>
+            ${filtrado.map(item => `
+              <tr>
+                <td class="${item.tipo === 'Entrada' ? 'entrada' : 'saida'}">${item.tipo}</td>
+                <td>${item.responsavel}</td>
+                <td>${item.contaFinanceira || "—"}</td>
+                <td>${item.centroCusto || "—"}</td>
+                <td>${item.quantidade}</td>
+                <td>${item.estoqueFinal}</td>
+                <td>${item.data}</td>
+              </tr>`).join("")}
+          </tbody>
+        </table>`;
 
-  const proximaLinha = tr.nextSibling;
+      trHist.appendChild(tdHist);
+      tr.parentNode.insertBefore(trHist, tr.nextSibling);
+    });
 
-  // 🔹 SE JÁ ESTIVER ABERTO → FECHA
-  if(proximaLinha && proximaLinha.classList?.contains("linha-historico")){
-    proximaLinha.remove();
-    botaoExpandir.textContent = "▼"; // 👈 volta pra baixo
-    return;
-  }
-
-  // 🔹 MUDA A SETA PRA CIMA
-  botaoExpandir.textContent = "▲";
-
-  // 🔹 busca histórico
-  const snapshotHist = await get(ref(database, "historico"));
-  if(!snapshotHist.exists()) return;
-
-  const historico = snapshotHist.val();
-
-  // 🔹 cria linha expandida
-  const trHist = document.createElement("tr");
-  trHist.classList.add("linha-historico");
-
-  const tdHist = document.createElement("td");
-  tdHist.colSpan = 5; // ajusta conforme número de colunas
-
-let html = `
-  <table class="tabela-historico">
-    <thead>
-      <tr>
-        <th>Operação</th>
-	<th>Responsável</th>
-	<th>Conta Financeira</th>
-	<th>Centro de Custo</th>
-	<th>Quantidade</th>
-	<th>Estoque após</th>
-	<th>Data</th>
-      </tr>
-    </thead>
-    <tbody>
-`;
-
-const listaFiltrada = [];
-
-// 🔹 filtra só o produto atual
-for(let h in historico){
-  const item = historico[h];
-
-  if(item.produto === produto.nome){
-    listaFiltrada.push(item);
+    tdExpandir.appendChild(botaoExpandir);
+    tr.append(td(produto.nome), td(qtd), td(min), tdStatus(), tdExpandir);
+    lista.appendChild(tr);
   }
 }
 
-// 🔹 ordena (se tiver timestamp usa ele, senão tenta pela data)
-listaFiltrada.sort((a, b) => {
-  if(a.timestamp && b.timestamp){
-    return b.timestamp - a.timestamp;
-  }
-  return new Date(b.data) - new Date(a.data);
-});
-
-// 🔹 pega só os 5 últimos
-const ultimos = listaFiltrada.slice(0, 5);
-
-for(let item of ultimos){
-  html += `
-    <tr>
-      <td class="${item.tipo === 'Entrada' ? 'entrada' : 'saida'}">
-  	${item.tipo}
-      </td>
-      <td>${item.responsavel}</td>
-      <td>${item.contaFinanceira || "—"}</td>
-      <td>${item.centroCusto || "—"}</td>
-      <td>${item.quantidade}</td>
-      <td>${item.estoqueFinal}</td>
-      <td>${item.data}</td>
-    </tr>
-  `;
+// ─── Limpar histórico ────────────────────────────────────────────
+const botaoLimpar = document.getElementById("limparHistorico");
+if(botaoLimpar){
+  botaoLimpar.addEventListener("click", async function(){
+    if(!confirm("Deseja apagar todo o histórico?")) return;
+    await remove(ref(database, "historico"));
+    cacheHistorico = {};
+    renderizarHistorico();
+  });
 }
 
-  html += `
-    </tbody>
-  </table>
-`;
-
-  tdHist.innerHTML = html;
-  trHist.appendChild(tdHist);
-
-  // 🔹 insere logo abaixo da linha clicada
-  tr.parentNode.insertBefore(trHist, tr.nextSibling);
-});
-
-
-
-      tr.appendChild(tdNome);
-      tr.appendChild(tdQtd);
-      tr.appendChild(tdMin);
-      tr.appendChild(tdStatus);
-      tr.appendChild(tdExpandir);
-
-      lista.appendChild(tr);
-    }
-  }
+// ─── Filtros de busca ────────────────────────────────────────────
+const inputPesquisa = document.getElementById("pesquisaProduto");
+if(inputPesquisa){
+  inputPesquisa.addEventListener("input", function(){
+    filtrarLinhas("listaMovimentacao", this.value);
+  });
 }
 
+const inputEstoque = document.getElementById("pesquisaEstoque");
+if(inputEstoque){
+  inputEstoque.addEventListener("input", function(){
+    filtrarLinhas("listaProdutos", this.value);
+  });
+}
+
+function filtrarLinhas(tabelaId, filtro){
+  const f = filtro.toLowerCase();
+  document.querySelectorAll(`#${tabelaId} tr`).forEach(linha => {
+    linha.style.display =
+      linha.children[0]?.textContent.toLowerCase().includes(f) ? "" : "none";
+  });
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────
+function td(texto){
+  const el = document.createElement("td");
+  el.textContent = texto;
+  return el;
+}
+
+function tdStatus(){
+  const el = document.createElement("td");
+  el.textContent = "REPOR";
+  el.classList.add("status-baixo");
+  return el;
+}
+
+function criarInput(tipo, placeholder, classe){
+  const el = document.createElement("input");
+  el.type = tipo;
+  el.placeholder = placeholder;
+  el.classList.add(classe);
+  return el;
+}
