@@ -22,7 +22,7 @@ if (formRegistro){
       await createUserWithEmailAndPassword(auth, email, senha);
 
       alert("Usuário registrado!");
-      window.location.href = "/index.html";
+      window.location.href = "/estoque/index.html";
 
     } catch (erro){
       if(erro.code === "auth/email-already-in-use"){
@@ -52,7 +52,7 @@ if(formLogin){
       await signInWithEmailAndPassword(auth, email, senhaDigitada);
 
       alert("Login realizado com sucesso!");
-      window.location.href = "/index.html";
+      window.location.href = "/estoque/index.html";
 
     } catch (erro){
       alert("Usuário ou senha inválidos!");
