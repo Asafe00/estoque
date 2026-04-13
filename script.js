@@ -5,7 +5,6 @@ from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
 const auth = getAuth();
 
-// 👇 deixa global pra usar no botão
 window.logout = function(){
   signOut(auth);
 };
@@ -432,7 +431,7 @@ botaoExpandir.addEventListener("click", async function(){
   // 🔹 SE JÁ ESTIVER ABERTO → FECHA
   if(proximaLinha && proximaLinha.classList?.contains("linha-historico")){
     proximaLinha.remove();
-    botaoExpandir.textContent = "▼"; // 👈 volta pra baixo
+    botaoExpandir.textContent = "▼"; // volta pra baixo
     return;
   }
 
@@ -531,3 +530,90 @@ for(let item of ultimos){
   }
 }
 
+
+let popupAtual = null;
+
+const titulos = {
+    contaFinanceira: 'Conta Financeira',
+    centroCusto: 'Centro de Custo'
+};
+
+// Caminhos no Realtime Database
+const caminhos = {
+    contaFinanceira: 'contasFinanceiras',
+    centroCusto: 'centrosDeCusto'
+};
+
+function abrirPopup(tipo) {
+    popupAtual = tipo;
+    document.getElementById('popupTitulo').textContent = titulos[tipo];
+    document.getElementById('popupAdicionarTitulo').textContent = 'Novo: ' + titulos[tipo];
+    document.getElementById('popupPesquisa').value = '';
+    escutarLista(tipo);
+    document.getElementById('overlayPopup').classList.add('ativo');
+    document.getElementById('popupPrincipal').classList.add('ativo');
+}
+
+function fecharPopup() {
+    document.getElementById('overlayPopup').classList.remove('ativo');
+    document.getElementById('popupPrincipal').classList.remove('ativo');
+    fecharPopupAdicionar();
+    popupAtual = null;
+}
+
+function abrirPopupAdicionar() {
+    document.getElementById('popupNovoNome').value = '';
+    document.getElementById('popupAdicionar').classList.add('ativo');
+}
+
+function fecharPopupAdicionar() {
+    document.getElementById('popupAdicionar').classList.remove('ativo');
+}
+
+async function adicionarItem() {
+    const nome = document.getElementById('popupNovoNome').value.trim();
+    if (!nome || !popupAtual) return;
+
+    const caminho = caminhos[popupAtual];
+    const refDb = ref(db, caminho);
+
+    await push(refDb, { nome });
+    fecharPopupAdicionar();
+}
+
+function escutarLista(tipo) {
+    const caminho = caminhos[tipo];
+    const refDb = ref(db, caminho);
+
+    onValue(refDb, (snapshot) => {
+        const dados = snapshot.val();
+        const itens = dados ? Object.values(dados).map(d => d.nome) : [];
+        const filtro = document.getElementById('popupPesquisa').value;
+        renderizarLista(itens, filtro);
+    });
+}
+
+function renderizarLista(itens, filtro = '') {
+    const lista = document.getElementById('popupLista');
+    const filtrados = itens.filter(i => i.toLowerCase().includes(filtro.toLowerCase()));
+    lista.innerHTML = filtrados.length
+        ? filtrados.map(i => `<div class="popup-lista-item">${i}</div>`).join('')
+        : `<div style="color:#475569;font-size:13px;padding:10px;">Nenhum item encontrado.</div>`;
+}
+
+document.getElementById('popupPesquisa').addEventListener('input', e => {
+    if (!popupAtual) return;
+    const caminho = caminhos[popupAtual];
+    const refDb = ref(db, caminho);
+    onValue(refDb, (snapshot) => {
+        const dados = snapshot.val();
+        const itens = dados ? Object.values(dados).map(d => d.nome) : [];
+        renderizarLista(itens, e.target.value);
+    }, { onlyOnce: true });
+});
+
+window.abrirPopup = abrirPopup;
+window.fecharPopup = fecharPopup;
+window.abrirPopupAdicionar = abrirPopupAdicionar;
+window.fecharPopupAdicionar = fecharPopupAdicionar;
+window.adicionarItem = adicionarItem;

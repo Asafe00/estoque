@@ -16,8 +16,39 @@
         </svg>
         Início
         </a>
+
+        <div style="display:flex; gap:10px;">
+           <button class="btn-info-popup" onclick="abrirPopup('contaFinanceira')">Conta Financeira</button>
+           <button class="btn-info-popup" onclick="abrirPopup('centroCusto')">Centro de Custo</button>
+        </div>
 	
     </div>
+
+<div id="overlayPopup" class="popup-overlay" onclick="fecharPopup()"></div>
+
+<div id="popupPrincipal" class="popup-box">
+    <div class="popup-header">
+        <h2 id="popupTitulo"></h2>
+        <button class="popup-fechar" onclick="fecharPopup()">✕</button>
+    </div>
+    <div class="popup-search-row">
+        <input type="text" id="popupPesquisa" class="input" placeholder="Pesquisar...">
+        <button class="btn-add" onclick="abrirPopupAdicionar()" title="Adicionar novo">+</button>
+    </div>
+    <div id="popupLista" class="popup-lista"></div>
+</div>
+
+<!-- POP-UP ADICIONAR -->
+<div id="popupAdicionar" class="popup-box popup-mini">
+    <div class="popup-header">
+        <h2 id="popupAdicionarTitulo"></h2>
+        <button class="popup-fechar" onclick="fecharPopupAdicionar()">✕</button>
+    </div>
+    <div class="popup-add-form">
+        <input type="text" id="popupNovoNome" class="input" placeholder="Nome...">
+        <button class="btn" onclick="adicionarItem()">Adicionar</button>
+    </div>
+</div>
 
 
 <div class="container">
