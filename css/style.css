@@ -42,7 +42,7 @@ body {
 ======================= */
 .container {
     max-width: 1100px;
-    margin: 40px auto;
+    margin: 10px auto;
     padding: 0 20px;
 }
 
@@ -244,6 +244,9 @@ table {
 
 thead {
     background: var(--bg-tertiary);
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 th, td {
