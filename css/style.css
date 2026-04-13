@@ -59,6 +59,12 @@ body {
     }
 }
 
+.topbar {
+    background: var(--bg-secondary);
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+}
 
 
 .top-actions {
