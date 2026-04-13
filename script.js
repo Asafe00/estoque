@@ -1,5 +1,5 @@
 import { database } from "./firebase.js";
-import { ref, push, get, remove, update } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+import { ref, push, onValue, get, remove, update } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
 import { getAuth, signOut } 
 from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
@@ -530,6 +530,8 @@ for(let item of ultimos){
   }
 }
 
+
+const db = database();
 
 let popupAtual = null;
 
