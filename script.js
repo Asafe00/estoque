@@ -531,8 +531,6 @@ for(let item of ultimos){
 }
 
 
-const db = database();
-
 let popupAtual = null;
 
 const titulos = {
@@ -540,7 +538,6 @@ const titulos = {
     centroCusto: 'Centro de Custo'
 };
 
-// Caminhos no Realtime Database
 const caminhos = {
     contaFinanceira: 'contasFinanceiras',
     centroCusto: 'centrosDeCusto'
@@ -577,7 +574,7 @@ async function adicionarItem() {
     if (!nome || !popupAtual) return;
 
     const caminho = caminhos[popupAtual];
-    const refDb = ref(db, caminho);
+    const refDb = ref(database, caminho);
 
     await push(refDb, { nome });
     fecharPopupAdicionar();
@@ -585,7 +582,7 @@ async function adicionarItem() {
 
 function escutarLista(tipo) {
     const caminho = caminhos[tipo];
-    const refDb = ref(db, caminho);
+    const refDb = ref(database, caminho);
 
     onValue(refDb, (snapshot) => {
         const dados = snapshot.val();
@@ -605,8 +602,7 @@ function renderizarLista(itens, filtro = '') {
 
 document.getElementById('popupPesquisa').addEventListener('input', e => {
     if (!popupAtual) return;
-    const caminho = caminhos[popupAtual];
-    const refDb = ref(db, caminho);
+    const refDb = ref(database, caminhos[popupAtual]);
     onValue(refDb, (snapshot) => {
         const dados = snapshot.val();
         const itens = dados ? Object.values(dados).map(d => d.nome) : [];
