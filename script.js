@@ -709,15 +709,7 @@ function renderizarConfig(tipo) {
 
 let popupAtual = null;
 
-const titulos = {
-    contaFinanceira: 'Conta Financeira',
-    centroCusto: 'Centro de Custo'
-};
 
-const caminhos = {
-    contaFinanceira: 'contasFinanceiras',
-    centroCusto: 'centrosDeCusto'
-};
 
 function abrirPopup(tipo) {
     popupAtual = tipo;
