@@ -707,7 +707,6 @@ function renderizarConfig(tipo) {
 }
 
 
-
 function renderizarLista(itens, filtro = '') {
     const lista = document.getElementById('popupLista');
     const filtrados = itens.filter(i => i.toLowerCase().includes(filtro.toLowerCase()));
