@@ -345,71 +345,30 @@
       </div>
     </div>
     <div class="dash-grid">
-      <!-- Contas financeiras -->
-      <div class="panel">
-        <div class="panel-header">
-          <h2 class="panel-title">Contas Financeiras</h2>
-          <button class="btn-icon" onclick="abrirPopup('contaFinanceira')">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-            Gerenciar
-          </button>
-        </div>
-        <div class="panel-body">
-          <div id="listaContasView" class="config-list"></div>
-        </div>
-      </div>
-      <!-- Centros de custo -->
-      <div class="panel">
-        <div class="panel-header">
-          <h2 class="panel-title">Centros de Custo</h2>
-          <button class="btn-icon" onclick="abrirPopup('centroCusto')">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-            Gerenciar
-          </button>
-        </div>
-        <div class="panel-body">
-          <div id="listaCentrosView" class="config-list"></div>
-        </div>
-      </div>
+      <!-- Config — Contas Financeiras -->
+<div class="panel">
+  <div class="panel-header">
+    <h2 class="panel-title">Contas Financeiras</h2>
+  </div>
+  <div class="panel-body">
+    <div id="listaContasView" class="config-list"></div>
+  </div>
+</div>
+
+<!-- Config — Centros de Custo -->
+<div class="panel">
+  <div class="panel-header">
+    <h2 class="panel-title">Centros de Custo</h2>
+  </div>
+  <div class="panel-body">
+    <div id="listaCentrosView" class="config-list"></div>
+  </div>
+</div>
     </div>
   </section>
 
 </main>
 
-<!-- ===== POPUP OVERLAY ===== -->
-<div class="overlay" id="overlayPopup" onclick="fecharPopup()"></div>
-<div class="popup" id="popupPrincipal">
-  <div class="popup-header">
-    <h3 id="popupTitulo">—</h3>
-    <button class="popup-close" onclick="fecharPopup()">×</button>
-  </div>
-  <div class="popup-search">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input type="text" id="popupPesquisa" placeholder="Pesquisar..."/>
-  </div>
-  <div id="popupLista" class="popup-lista"></div>
-  <div class="popup-footer">
-    <button class="btn-primary-full" onclick="abrirPopupAdicionar()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-      <span id="popupAdicionarTitulo">Adicionar</span>
-    </button>
-  </div>
-</div>
-
-<!-- POPUP ADICIONAR -->
-<div class="popup popup-add" id="popupAdicionar">
-  <div class="popup-header">
-    <h3>Novo Item</h3>
-    <button class="popup-close" onclick="fecharPopupAdicionar()">×</button>
-  </div>
-  <div class="popup-body">
-    <div class="field-group">
-      <label>Nome</label>
-      <input type="text" id="popupNovoNome" placeholder="Digite o nome..."/>
-    </div>
-    <button class="btn-primary-full" onclick="adicionarItem()">Confirmar</button>
-  </div>
-</div>
 
 <!-- TOAST -->
 <div class="toast-container" id="toastContainer"></div>

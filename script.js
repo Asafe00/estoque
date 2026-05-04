@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", function(){
   carregarHistorico();
   carregarMinimos();
   atualizarDashboard();
+  iniciarConfig();
 });
 if(formProduto){
   formProduto.addEventListener("submit", async function(event){
@@ -194,21 +195,51 @@ async function mostrarProdutos() {
     inputNumero.classList.add("mov-input");
     tdNum.appendChild(inputNumero);
 
-    // Conta Financeira
-    const tdConta = document.createElement("td");
-    const inputConta = document.createElement("input");
-    inputConta.type = "text";
-    inputConta.placeholder = "Conta financeira";
-    inputConta.classList.add("mov-input");
-    tdConta.appendChild(inputConta);
+   // Conta Financeira — SUBSTITUIR o bloco de inputConta
+	const tdConta = document.createElement("td");
+	const inputConta = document.createElement("select");
+	inputConta.classList.add("mov-input");
 
-    // Centro de Custo
-    const tdCentro = document.createElement("td");
-    const inputCentro = document.createElement("input");
-    inputCentro.type = "text";
-    inputCentro.placeholder = "Centro de custo";
-    inputCentro.classList.add("mov-input");
-    tdCentro.appendChild(inputCentro);
+	const optContaDefault = document.createElement("option");
+	optContaDefault.value = "";
+	optContaDefault.textContent = "Conta financeira";
+	optContaDefault.disabled = true;
+	optContaDefault.selected = true;
+	inputConta.appendChild(optContaDefault);
+
+	const snapContas = await get(ref(database, "contasFinanceiras"));
+	if (snapContas.exists()) {
+  	Object.values(snapContas.val()).forEach(c => {
+    	const opt = document.createElement("option");
+    	opt.value = c.nome;
+    	opt.textContent = c.nome;
+    	inputConta.appendChild(opt);
+  	});
+	}
+	tdConta.appendChild(inputConta);
+
+// Centro de Custo — SUBSTITUIR o bloco de inputCentro
+const tdCentro = document.createElement("td");
+const inputCentro = document.createElement("select");
+inputCentro.classList.add("mov-input");
+
+const optCentroDefault = document.createElement("option");
+optCentroDefault.value = "";
+optCentroDefault.textContent = "Centro de custo";
+optCentroDefault.disabled = true;
+optCentroDefault.selected = true;
+inputCentro.appendChild(optCentroDefault);
+
+const snapCentros = await get(ref(database, "centrosDeCusto"));
+if (snapCentros.exists()) {
+  Object.values(snapCentros.val()).forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.nome;
+    opt.textContent = c.nome;
+    inputCentro.appendChild(opt);
+  });
+}
+tdCentro.appendChild(inputCentro);
 
     // Ações
     const tdAcoes = document.createElement("td");
@@ -600,6 +631,79 @@ async function atualizarDashboard() {
   const snap = await get(ref(database, "historico"));
   const kpiMov = document.getElementById("kpiMovimentacoes");
   if (kpiMov) kpiMov.textContent = snap.exists() ? Object.keys(snap.val()).length : 0;
+}
+
+
+function iniciarConfig() {
+  renderizarConfig("contaFinanceira");
+  renderizarConfig("centroCusto");
+}
+
+const titulos = {
+  contaFinanceira: "Conta Financeira",
+  centroCusto: "Centro de Custo",
+};
+
+const caminhos = {
+  contaFinanceira: "contasFinanceiras",
+  centroCusto: "centrosDeCusto",
+};
+
+const viewIds = {
+  contaFinanceira: "listaContasView",
+  centroCusto: "listaCentrosView",
+};
+
+function renderizarConfig(tipo) {
+  const caminho = caminhos[tipo];
+  const container = document.getElementById(viewIds[tipo]);
+  if (!container) return;
+
+  onValue(ref(database, caminho), (snapshot) => {
+    const dados = snapshot.val();
+    container.innerHTML = "";
+
+    if (dados) {
+      Object.entries(dados).forEach(([id, item]) => {
+        const div = document.createElement("div");
+        div.className = "config-item-row";
+        div.innerHTML = `
+          <span class="config-dot"></span>
+          <span class="config-item-nome">${item.nome}</span>
+          <button class="btn-excluir-config" data-id="${id}" data-tipo="${tipo}">×</button>
+        `;
+        div.querySelector(".btn-excluir-config").addEventListener("click", async function () {
+          const confirmar = confirm(`Remover "${item.nome}"?`);
+          if (confirmar) await remove(ref(database, `${caminho}/${id}`));
+        });
+        container.appendChild(div);
+      });
+    }
+
+    // Campo inline para adicionar
+    const addRow = document.createElement("div");
+    addRow.className = "config-add-row";
+    addRow.innerHTML = `
+      <input type="text" class="config-add-input" placeholder="Novo ${titulos[tipo]}..."/>
+      <button class="config-add-btn">+</button>
+    `;
+    addRow.querySelector(".config-add-btn").addEventListener("click", async function () {
+      const input = addRow.querySelector(".config-add-input");
+      const nome = input.value.trim();
+      if (!nome) return;
+      await push(ref(database, caminho), { nome });
+      input.value = "";
+    });
+    addRow.querySelector(".config-add-input").addEventListener("keydown", async function (e) {
+      if (e.key === "Enter") {
+        const nome = this.value.trim();
+        if (!nome) return;
+        await push(ref(database, caminho), { nome });
+        this.value = "";
+      }
+    });
+    container.appendChild(addRow);
+  });
 }
 
 
