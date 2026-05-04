@@ -707,56 +707,6 @@ function renderizarConfig(tipo) {
 }
 
 
-let popupAtual = null;
-
-function abrirPopup(tipo) {
-    popupAtual = tipo;
-    document.getElementById('popupTitulo').textContent = titulos[tipo];
-    document.getElementById('popupAdicionarTitulo').textContent = 'Novo: ' + titulos[tipo];
-    document.getElementById('popupPesquisa').value = '';
-    escutarLista(tipo);
-    document.getElementById('overlayPopup').classList.add('ativo');
-    document.getElementById('popupPrincipal').classList.add('ativo');
-}
-
-function fecharPopup() {
-    document.getElementById('overlayPopup').classList.remove('ativo');
-    document.getElementById('popupPrincipal').classList.remove('ativo');
-    fecharPopupAdicionar();
-    popupAtual = null;
-}
-
-function abrirPopupAdicionar() {
-    document.getElementById('popupNovoNome').value = '';
-    document.getElementById('popupAdicionar').classList.add('ativo');
-}
-
-function fecharPopupAdicionar() {
-    document.getElementById('popupAdicionar').classList.remove('ativo');
-}
-
-async function adicionarItem() {
-    const nome = document.getElementById('popupNovoNome').value.trim();
-    if (!nome || !popupAtual) return;
-
-    const caminho = caminhos[popupAtual];
-    const refDb = ref(database, caminho);
-
-    await push(refDb, { nome });
-    fecharPopupAdicionar();
-}
-
-function escutarLista(tipo) {
-    const caminho = caminhos[tipo];
-    const refDb = ref(database, caminho);
-
-    onValue(refDb, (snapshot) => {
-        const dados = snapshot.val();
-        const itens = dados ? Object.values(dados).map(d => d.nome) : [];
-        const filtro = document.getElementById('popupPesquisa').value;
-        renderizarLista(itens, filtro);
-    });
-}
 
 function renderizarLista(itens, filtro = '') {
     const lista = document.getElementById('popupLista');
@@ -765,19 +715,3 @@ function renderizarLista(itens, filtro = '') {
         ? filtrados.map(i => `<div class="popup-lista-item">${i}</div>`).join('')
         : `<div style="color:#475569;font-size:13px;padding:10px;">Nenhum item encontrado.</div>`;
 }
-
-document.getElementById('popupPesquisa').addEventListener('input', e => {
-    if (!popupAtual) return;
-    const refDb = ref(database, caminhos[popupAtual]);
-    onValue(refDb, (snapshot) => {
-        const dados = snapshot.val();
-        const itens = dados ? Object.values(dados).map(d => d.nome) : [];
-        renderizarLista(itens, e.target.value);
-    }, { onlyOnce: true });
-});
-
-window.abrirPopup = abrirPopup;
-window.fecharPopup = fecharPopup;
-window.abrirPopupAdicionar = abrirPopupAdicionar;
-window.fecharPopupAdicionar = fecharPopupAdicionar;
-window.adicionarItem = adicionarItem;
