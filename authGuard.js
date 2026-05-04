@@ -17,6 +17,10 @@ if (!ehPublica) {
   onAuthStateChanged(auth, (user) => {
     if (!user) {
       window.location.href = "/estoque/paginas/login.html";
-    }
+    } else {
+    // Usa displayName se existir, senão usa o e-mail antes do @
+    const nome = user.displayName || user.email.split("@")[0];
+    if (window.setUserDisplay) window.setUserDisplay(nome);
+  }
   });
 }

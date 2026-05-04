@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", function(){
   mostrarProdutos();
   carregarHistorico();
   carregarMinimos();
+  atualizarDashboard();
 });
 if(formProduto){
   formProduto.addEventListener("submit", async function(event){
@@ -56,194 +57,213 @@ if(existe){
     carregarProdutos();
   });
 }
-async function carregarProdutos(){
-  const listaProdutos = document.getElementById("listaProdutos");
-  if(!listaProdutos) return;
 
-  listaProdutos.innerHTML = "";
+
+async function carregarProdutos() {
+  const listaProdutos = document.getElementById("listaProdutos");
+  const listaCadastro = document.getElementById("listaProdutosCadastro");
+
+  if (listaProdutos) listaProdutos.innerHTML = "";
+  if (listaCadastro) listaCadastro.innerHTML = "";
 
   const snapshot = await get(ref(database, "produtos"));
-
-  if(!snapshot.exists()) return;
+  if (!snapshot.exists()) return;
 
   const produtos = snapshot.val();
 
-  for(let id in produtos){
+  // KPIs
+  let totalProdutos = 0, totalUnidades = 0, totalAlertas = 0;
 
-    const tr = document.createElement("tr");
+  for (let id in produtos) {
+    const p = produtos[id];
+    const qtd = Number(p.quantidade);
+    const min = Number(p.quantidadeMinima);
+    totalProdutos++;
+    totalUnidades += qtd;
+    if (qtd <= min) totalAlertas++;
 
-    const tdNome = document.createElement("td");
-    tdNome.textContent = produtos[id].nome;
+    // ── TABELA ESTOQUE ──
+    if (listaProdutos) {
+      const tr = document.createElement("tr");
 
-    const tdQtd = document.createElement("td");
-    tdQtd.textContent = produtos[id].quantidade;
+      const tdNome = document.createElement("td");
+      tdNome.textContent = p.nome;
 
-    const tdAcao = document.createElement("td");
+      const tdQtd = document.createElement("td");
+      tdQtd.textContent = qtd;
 
-    const botaoExcluir = document.createElement("button");
-    botaoExcluir.textContent = "Excluir";
-    botaoExcluir.classList.add("botaoexcluir");
+      const tdMin = document.createElement("td");
+      tdMin.textContent = min;
 
-    botaoExcluir.addEventListener("click", async function(){
-      await remove(ref(database, "produtos/" + id));
-      carregarProdutos();
-    });
+      const tdStatus = document.createElement("td");
+      const badge = document.createElement("span");
+      badge.textContent = qtd <= min ? "Baixo" : "OK";
+      badge.className = qtd <= min ? "status-baixo" : "status-ok";
+      tdStatus.appendChild(badge);
 
-    tdAcao.appendChild(botaoExcluir);
+      const tdAcao = document.createElement("td");
+      const botaoExcluir = document.createElement("button");
+      botaoExcluir.textContent = "Excluir";
+      botaoExcluir.classList.add("btn-excluir");
+      botaoExcluir.addEventListener("click", async function () {
+        await remove(ref(database, "produtos/" + id));
+        carregarProdutos();
+        mostrarProdutos();
+        carregarMinimos();
+      });
+      tdAcao.appendChild(botaoExcluir);
 
-    tr.appendChild(tdNome);
-    tr.appendChild(tdQtd);
-    tr.appendChild(tdAcao);
+      tr.append(tdNome, tdQtd, tdMin, tdStatus, tdAcao);
+      listaProdutos.appendChild(tr);
+    }
 
-    listaProdutos.appendChild(tr);
+    // ── TABELA CADASTRO ──
+    if (listaCadastro) {
+      const tr = document.createElement("tr");
+      const tdNome = document.createElement("td");
+      tdNome.textContent = p.nome;
+      const tdQtd = document.createElement("td");
+      tdQtd.textContent = qtd;
+      const tdAcao = document.createElement("td");
+      const botaoExcluir = document.createElement("button");
+      botaoExcluir.textContent = "Excluir";
+      botaoExcluir.classList.add("btn-excluir");
+      botaoExcluir.addEventListener("click", async function () {
+        await remove(ref(database, "produtos/" + id));
+        carregarProdutos();
+        mostrarProdutos();
+        carregarMinimos();
+      });
+      tdAcao.appendChild(botaoExcluir);
+      tr.append(tdNome, tdQtd, tdAcao);
+      listaCadastro.appendChild(tr);
+    }
+  }
+
+  // Atualiza KPIs
+  const el = (id) => document.getElementById(id);
+  if (el("kpiTotal")) el("kpiTotal").textContent = totalProdutos;
+  if (el("kpiUnidades")) el("kpiUnidades").textContent = totalUnidades;
+  if (el("kpiAlertas")) el("kpiAlertas").textContent = totalAlertas;
+
+  const badge = document.getElementById("badgeAlertas");
+  if (badge) {
+    badge.textContent = totalAlertas;
+    badge.setAttribute("data-count", totalAlertas);
   }
 }
 
-async function mostrarProdutos(){
+
+async function mostrarProdutos() {
   const listaMovimentacao = document.getElementById("listaMovimentacao");
-  if(!listaMovimentacao) return;
+  if (!listaMovimentacao) return;
 
   listaMovimentacao.innerHTML = "";
 
   const snapshot = await get(ref(database, "produtos"));
-
-  if(!snapshot.exists()) return;
+  if (!snapshot.exists()) return;
 
   const produtos = snapshot.val();
 
-  for(let id in produtos){
-
+  for (let id in produtos) {
     const produto = produtos[id];
-
     const tr = document.createElement("tr");
 
+    // Produto
     const tdNome = document.createElement("td");
     tdNome.textContent = produto.nome;
 
+    // Estoque
     const tdQtd = document.createElement("td");
     tdQtd.textContent = produto.quantidade;
 
-    const tdMov = document.createElement("td");
-
+    // Responsável
+    const tdResp = document.createElement("td");
     const inputPessoa = document.createElement("input");
     inputPessoa.type = "text";
     inputPessoa.placeholder = "Responsável";
-    inputPessoa.classList.add("input-pessoa");
+    inputPessoa.classList.add("mov-input");
+    tdResp.appendChild(inputPessoa);
 
+    // Quantidade
+    const tdNum = document.createElement("td");
     const inputNumero = document.createElement("input");
     inputNumero.type = "number";
-    inputNumero.classList.add("input-numero");
+    inputNumero.min = "1";
+    inputNumero.placeholder = "0";
+    inputNumero.classList.add("mov-input");
+    tdNum.appendChild(inputNumero);
 
+    // Conta Financeira
+    const tdConta = document.createElement("td");
     const inputConta = document.createElement("input");
     inputConta.type = "text";
     inputConta.placeholder = "Conta financeira";
-    inputConta.classList.add("input-conta");
+    inputConta.classList.add("mov-input");
+    tdConta.appendChild(inputConta);
 
+    // Centro de Custo
+    const tdCentro = document.createElement("td");
     const inputCentro = document.createElement("input");
     inputCentro.type = "text";
     inputCentro.placeholder = "Centro de custo";
-    inputCentro.classList.add("input-centro");
+    inputCentro.classList.add("mov-input");
+    tdCentro.appendChild(inputCentro);
 
+    // Ações
+    const tdAcoes = document.createElement("td");
     const botaoAdd = document.createElement("button");
     botaoAdd.textContent = "+";
     botaoAdd.classList.add("btn-add");
-
     const botaoRem = document.createElement("button");
-    botaoRem.textContent = "-";
-    botaoRem.classList.add("btn-rem");    
+    botaoRem.textContent = "−";
+    botaoRem.classList.add("btn-rem");
 
+    const wrapAcoes = document.createElement("div");
+    wrapAcoes.classList.add("mov-actions");
+    wrapAcoes.append(botaoAdd, botaoRem);
+    tdAcoes.appendChild(wrapAcoes);
 
-    // 🔹 ENTRADA
-    botaoAdd.addEventListener("click", async function(){
-
+    // Entrada
+    botaoAdd.addEventListener("click", async function () {
       const valor = Number(inputNumero.value);
-      const pessoa = inputPessoa.value;
-      const conta = inputConta.value;
-      const centro = inputCentro.value;
+      if (!valor || valor <= 0) return;
       const estoqueAnterior = produto.quantidade;
-
-      if(!valor) return;
-
       const novaQuantidade = Number(produto.quantidade) + valor;
-
-      // 🔹 ATUALIZA PRODUTO
-      await update(ref(database, "produtos/" + id), {
-        quantidade: novaQuantidade
-      });
-
-      // 🔹 SALVA HISTÓRICO
+      await update(ref(database, "produtos/" + id), { quantidade: novaQuantidade });
       await push(ref(database, "historico"), {
-        produto: produto.nome,
-        tipo: "Entrada",
-        responsavel: pessoa || "Não Informado",
-        quantidade: valor,
-        estoqueAnterior: estoqueAnterior,
-        estoqueFinal: novaQuantidade,
-	contaFinanceira: conta || "Não informado",
-	centroCusto: centro || "Não informado",
-        data: new Date().toLocaleString()
+        produto: produto.nome, tipo: "Entrada",
+        responsavel: inputPessoa.value || "Não informado",
+        quantidade: valor, estoqueAnterior, estoqueFinal: novaQuantidade,
+        contaFinanceira: inputConta.value || "Não informado",
+        centroCusto: inputCentro.value || "Não informado",
+        data: new Date().toLocaleString("pt-BR")
       });
-await carregarProdutos();
-await mostrarProdutos();
-await carregarHistorico();
-await carregarMinimos();
+      await Promise.all([carregarProdutos(), mostrarProdutos(), carregarHistorico(), carregarMinimos(), atualizarDashboard()]);
     });
 
-    // 🔹 SAÍDA
-    botaoRem.addEventListener("click", async function(){
-
+    // Saída
+    botaoRem.addEventListener("click", async function () {
       const valor = Number(inputNumero.value);
-      const pessoa = inputPessoa.value;
-      const conta = inputConta.value;
-      const centro = inputCentro.value;
+      if (!valor || valor <= 0) return;
       const estoqueAnterior = produto.quantidade;
-
-      if(!valor) return;
-
-      let novaQuantidade = Number(produto.quantidade) - valor;
-
-      if(novaQuantidade < 0){
-        novaQuantidade = 0;
-      }
-
-      // 🔹 ATUALIZA PRODUTO
-      await update(ref(database, "produtos/" + id), {
-        quantidade: novaQuantidade
-      });
-
-      // 🔹 SALVA HISTÓRICO
+      let novaQuantidade = Math.max(0, Number(produto.quantidade) - valor);
+      await update(ref(database, "produtos/" + id), { quantidade: novaQuantidade });
       await push(ref(database, "historico"), {
-        produto: produto.nome,
-        tipo: "Saída",
-        responsavel: pessoa || "Não informado",
-        quantidade: valor,
-        estoqueAnterior: estoqueAnterior,
-        estoqueFinal: novaQuantidade,
-	contaFinanceira: conta || "Não informado",
-	centroCusto: centro || "Não informado",
-        data: new Date().toLocaleString()
+        produto: produto.nome, tipo: "Saída",
+        responsavel: inputPessoa.value || "Não informado",
+        quantidade: valor, estoqueAnterior, estoqueFinal: novaQuantidade,
+        contaFinanceira: inputConta.value || "Não informado",
+        centroCusto: inputCentro.value || "Não informado",
+        data: new Date().toLocaleString("pt-BR")
       });
-await carregarProdutos();
-await mostrarProdutos();
-await carregarHistorico();
-await carregarMinimos();
+      await Promise.all([carregarProdutos(), mostrarProdutos(), carregarHistorico(), carregarMinimos(), atualizarDashboard()]);
     });
 
-    tdMov.appendChild(inputPessoa);
-    tdMov.appendChild(inputNumero);
-    tdMov.appendChild(inputConta);
-    tdMov.appendChild(inputCentro);
-    tdMov.appendChild(botaoAdd);
-    tdMov.appendChild(botaoRem);
-
-    tr.appendChild(tdNome);
-    tr.appendChild(tdQtd);
-    tr.appendChild(tdMov);
-
+    tr.append(tdNome, tdQtd, tdResp, tdNum, tdConta, tdCentro, tdAcoes);
     listaMovimentacao.appendChild(tr);
   }
 }
-
 async function carregarHistorico(){
   const listaHistorico = document.getElementById("listaHistorico");
   if(listaHistorico){
@@ -528,6 +548,58 @@ for(let item of ultimos){
       lista.appendChild(tr);
     }
   }
+}
+
+async function atualizarDashboard() {
+  // Últimas movimentações
+  const dashHist = document.getElementById("dashHistorico");
+  if (dashHist) {
+    const snap = await get(ref(database, "historico"));
+    dashHist.innerHTML = "";
+    if (snap.exists()) {
+      const items = Object.values(snap.val()).reverse().slice(0, 5);
+      items.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item.produto}</td>
+          <td><span class="tipo-${item.tipo === 'Entrada' ? 'entrada' : 'saida'}">${item.tipo}</span></td>
+          <td>${item.quantidade}</td>
+          <td>${item.data}</td>`;
+        dashHist.appendChild(tr);
+      });
+    }
+  }
+
+  // Alertas no dashboard
+  const dashAlertas = document.getElementById("dashAlertas");
+  if (dashAlertas) {
+    const snap = await get(ref(database, "produtos"));
+    dashAlertas.innerHTML = "";
+    if (snap.exists()) {
+      const produtos = snap.val();
+      let count = 0;
+      for (let id in produtos) {
+        const p = produtos[id];
+        if (Number(p.quantidade) <= Number(p.quantidadeMinima)) {
+          count++;
+          dashAlertas.innerHTML += `
+            <div class="alert-item">
+              <div>
+                <div class="alert-item-name">${p.nome}</div>
+                <div class="alert-item-qty">Qtd: ${p.quantidade} / Mín: ${p.quantidadeMinima}</div>
+              </div>
+              <span class="alert-tag">Repor</span>
+            </div>`;
+        }
+      }
+      if (count === 0) dashAlertas.innerHTML = `<div class="empty-state">Nenhum alerta no momento ✓</div>`;
+    }
+  }
+
+  // KPI movimentações
+  const snap = await get(ref(database, "historico"));
+  const kpiMov = document.getElementById("kpiMovimentacoes");
+  if (kpiMov) kpiMov.textContent = snap.exists() ? Object.keys(snap.val()).length : 0;
 }
 
 
