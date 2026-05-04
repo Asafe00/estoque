@@ -709,8 +709,6 @@ function renderizarConfig(tipo) {
 
 let popupAtual = null;
 
-
-
 function abrirPopup(tipo) {
     popupAtual = tipo;
     document.getElementById('popupTitulo').textContent = titulos[tipo];
